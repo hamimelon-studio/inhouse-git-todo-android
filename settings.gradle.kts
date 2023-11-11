@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CoroutinesVisualiser"
+rootProject.name = "Todo"
 include(":app")
  

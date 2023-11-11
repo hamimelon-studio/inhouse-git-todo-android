@@ -1,4 +1,4 @@
-package com.hongwei.demo.coroutinesvisualiser
+package com.hongwei.demo.todo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import com.hongwei.demo.coroutinesvisualiser.ui.theme.CoroutinesVisualiserTheme
-import com.hongwei.demo.coroutinesvisualiser.ui.view.Navigation
+import com.hongwei.demo.todo.ui.theme.TodoTheme
+import com.hongwei.demo.todo.ui.view.Navigation
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CoroutinesVisualiserTheme {
+            TodoTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -44,7 +44,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    CoroutinesVisualiserTheme {
+    TodoTheme {
         Greeting("Android")
     }
 }

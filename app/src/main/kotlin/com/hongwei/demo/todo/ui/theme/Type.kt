@@ -1,4 +1,4 @@
-package com.hongwei.demo.coroutinesvisualiser.ui.theme
+package com.hongwei.demo.todo.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

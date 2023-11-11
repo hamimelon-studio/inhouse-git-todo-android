@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.hongwei.demo.coroutinesvisualiser"
+    namespace = "com.hongwei.demo.todo"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.hongwei.demo.coroutinesvisualiser"
+        applicationId = "com.hongwei.demo.todo"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
@@ -21,7 +21,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        manifestPlaceholders["hostName"] = "www.example.com"
+        manifestPlaceholders["hostName"] = "www.github.com"
     }
 
     buildTypes {
@@ -32,7 +32,7 @@ android {
 
         create("mock") {
             initWith(getByName("debug"))
-            manifestPlaceholders["hostName"] = "internal.example.com"
+            manifestPlaceholders["hostName"] = "internal.github.com"
             applicationIdSuffix = ".mock"
         }
 

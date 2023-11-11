@@ -1,7 +1,4 @@
-package com.hongwei.demo.coroutinesvisualiser.data.datasource
-
-import dagger.Provides
-import javax.inject.Singleton
+package com.hongwei.demo.todo.data.datasource
 
 class NetworkModule {
 //    @Provides

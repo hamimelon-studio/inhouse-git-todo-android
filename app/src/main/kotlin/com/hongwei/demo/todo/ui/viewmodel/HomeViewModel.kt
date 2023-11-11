@@ -1,4 +1,4 @@
-package com.hongwei.demo.coroutinesvisualiser.ui.viewmodel
+package com.hongwei.demo.todo.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
