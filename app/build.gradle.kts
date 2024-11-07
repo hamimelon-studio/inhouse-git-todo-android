@@ -1,19 +1,19 @@
+import java.util.Properties
+
 plugins {
-    kotlin("kapt")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt.android)
-    alias(libs.plugins.protobuf)
+    id("kotlin-kapt")
 }
 
 android {
-    namespace = "com.hongwei.demo.todo"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    namespace = "com.mikeapp.newideatodoapp"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.hongwei.demo.todo"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        applicationId = "com.mikeapp.newideatodoapp"
+        minSdk = 26
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -21,21 +21,21 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        manifestPlaceholders["hostName"] = "www.github.com"
+
+        val localProperties = Properties()
+        val localPropertiesFile = File(project.rootDir, "local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())  // Load properties into Properties object
+        }
+        val staticApiToken = localProperties.getProperty("staticApi.token", "ci")
+        buildConfigField("String", "STATIC_API_TOKEN", "\"$staticApiToken\"")
+//        buildTypes {
+//            getByName("debug") { buildConfigField("String", "staticApiToken", staticApiToken) }
+//            getByName("release") { buildConfigField("String", "staticApiToken", staticApiToken) }
+//        }
     }
 
     buildTypes {
-        debug {
-            applicationIdSuffix = ".debug"
-            isDebuggable = true
-        }
-
-        create("mock") {
-            initWith(getByName("debug"))
-            manifestPlaceholders["hostName"] = "internal.github.com"
-            applicationIdSuffix = ".mock"
-        }
-
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -44,35 +44,18 @@ android {
             )
         }
     }
-    buildFeatures {
-        buildConfig = true
-        compose = true
-    }
-    flavorDimensions.add("type")
-    productFlavors {
-        create("github") {
-            buildConfigField("String", "DATA_STORAGE", "\"github\"")
-            flavorDimensions[0] = "type"
-        }
-        create("protobuf") {
-            buildConfigField("String", "DATA_STORAGE", "\"githubprotobuf\"")
-            flavorDimensions[0] = "type"
-        }
-        create("firebase") {
-            buildConfigField("String", "DATA_STORAGE", "\"firebase\"")
-            flavorDimensions[0] = "type"
-        }
-    }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "1.8"
+    }
+    buildFeatures {
+        compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -82,32 +65,26 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.core.ktx)
-    implementation(libs.activity.compose)
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.compose.material3)
-    implementation(libs.coroutines.ui)
-    implementation(libs.hilt.android)
-    implementation(libs.lifecycle.viewmodel.compose)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.navigation.compose)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.okhttp)
-    implementation(libs.retrofit)
-    implementation(libs.protobuf)
-    implementation(libs.protoc)
-    kapt(libs.hilt.complier)
-
-    testImplementation(libs.junit4)
-    androidTestImplementation(libs.test.ext)
-    androidTestImplementation(libs.test.espresso.core)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.compose.ui.test)
-    debugImplementation(libs.compose.ui.tooling)
-    debugImplementation(libs.compose.ui.test.manifest)
-    testImplementation(libs.mockito)
+    // network
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.gson)
+    implementation(libs.okhttp3.logging.interceptor)
+    implementation(libs.okhttp3.okhttp)
 }

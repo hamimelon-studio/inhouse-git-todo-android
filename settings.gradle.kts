@@ -1,6 +1,12 @@
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -11,14 +17,8 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
     }
-
-    versionCatalogs {
-        create("libs") {
-            from(files("./buildPlugins/libs.versions.toml"))
-        }
-    }
 }
 
-rootProject.name = "Todo"
+rootProject.name = "NewIdeaTodoApp"
 include(":app")
  
