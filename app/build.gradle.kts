@@ -1,5 +1,6 @@
 import java.util.Properties
 
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -87,4 +88,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.okhttp3.logging.interceptor)
     implementation(libs.okhttp3.okhttp)
+
+    implementation(project(":github-api-lib"))
 }

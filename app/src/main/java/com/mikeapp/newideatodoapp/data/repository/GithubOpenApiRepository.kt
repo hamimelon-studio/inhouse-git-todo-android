@@ -8,82 +8,130 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class GithubOpenApiRepository() {
+class GithubOpenApiRepository {
     fun test() {
-//        createFileOnGitHub(
-//            "todoroot/test1.txt",
-//            "good test string input good new changes!!!",
-//            "test commit hahaha commit#2",
-//        )
-        readFileFromGithub("todoroot/test1.txt")
-    }
-
-    fun createFileOnGitHub(path: String, fileContent: String, commitMessage: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            val fileMetadataResponse = githubApiService.getFileMetadata(path)
-            Log.d("bbbb", "fileMetadataResponse: $fileMetadataResponse")
-            if (fileMetadataResponse.isSuccessful || fileMetadataResponse.code() == 404) {
-                val currentSha = if (fileMetadataResponse.isSuccessful) {
-                    val fileMetadata = fileMetadataResponse.body()
-                    Log.d("bbbb", "fileMetadata body: $fileMetadata")
-
-                    // Ensure we have the current SHA
-                    fileMetadata?.sha ?: throw IllegalStateException("File SHA not found")
-                } else null
-
-                // Encode the file content in Base64
-                val encodedContent = android.util.Base64.encodeToString(
-                    fileContent.toByteArray(Charsets.UTF_8),
-                    android.util.Base64.DEFAULT
-                )
-
-                // Create the request body with the encoded content
-                val createFileRequest = GitHubFileRequest(
-                    message = commitMessage,
-                    content = encodedContent,
-                    sha = currentSha
-                )
-
-                // Make the API call to create the file
-                val response = githubApiService.createOrUpdateFile(path, createFileRequest)
-
-                if (response.isSuccessful) {
-                    // File created successfully
-                    val fileContent = response.body()
-                    Log.d("GitHub API", "File created successfully: $fileContent")
-                } else {
-                    // Handle errors
-                    Log.e("GitHub API", "Error creating file: ${response.code()}")
-
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("GitHub API", "Error creating file: ${response.code()}, $errorBody")
-                }
-            }
+//            readContentInSingleCall("todoroot/test1.txt")
+//            getExistFileMeta()
+            createFileInSingleCall(
+                "todoroot/test2.txt",
+                "121212good test string input good new changes!!!",
+                "test commit hahaha commit#2",
+            )
         }
     }
 
-    fun readFileFromGithub(path: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val response = githubApiService.getFileContent(path)
+    private suspend fun getExistFileMeta() {
+        val response = githubApiService.getFileMetadata("todoroot/test1.txt")
+        Log.d("bbbb", "response.code: ${response.code()}")
+
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("bbbb", "response.body: ${response.body()}")
+        }
+    }
+
+    private suspend fun getNonExistFileMeta() {
+        val response = githubApiService.getFileMetadata("todoroot/test2.txt")
+        Log.d("bbbb", "response.code: ${response.code()}")
+
+        if (response.isSuccessful && response.body() != null) {
+            Log.d("bbbb", "response.body: ${response.body()}")
+        }
+    }
+
+    private suspend fun readContentInSingleCall(path: String): String? {
+        val response = githubApiService.getFileContent(path)
+        val body = response.body()
+
+        if (response.isSuccessful && body != null) {
+            // Decode the Base64 content of the file
+            val decodedContent = String(
+                android.util.Base64.decode(
+                    body.content,
+                    android.util.Base64.URL_SAFE
+                )
+            )
+            Log.d("bbbb", "decodedContent: $decodedContent")
+            return decodedContent
+        }
+        return null
+    }
+
+    private suspend fun createFileInSingleCall(
+        path: String,
+        fileContent: String,
+        commitMessage: String
+    ) {
+        // Encode the file content in Base64
+        val encodedContent = android.util.Base64.encodeToString(
+            fileContent.toByteArray(Charsets.UTF_8),
+            android.util.Base64.DEFAULT
+        )
+
+        // Create the request body with the encoded content
+        val createFileRequest = GitHubFileRequest(
+            message = commitMessage,
+            content = encodedContent,
+            sha = null // make sha null
+        )
+
+        val response = githubApiService.createFile(path, createFileRequest)
+
+        if (response.isSuccessful) {
+            // File created successfully
+            val fileContent = response.body()
+            Log.d("bbbb", "File created successfully. body: $fileContent")
+        } else {
+            // Handle errors
+            Log.e("bbbb", "Error creating file: ${response.code()}")
+
+            val errorBody = response.errorBody()?.string()
+            Log.e("bbbb", "Error creating file: ${response.code()}, $errorBody")
+        }
+    }
+
+    private suspend fun createFileOnGitHub(
+        path: String,
+        fileContent: String,
+        commitMessage: String
+    ) {
+        val fileMetadataResponse = githubApiService.getFileMetadata(path)
+        Log.d("bbbb", "fileMetadataResponse: $fileMetadataResponse")
+        if (fileMetadataResponse.isSuccessful || fileMetadataResponse.code() == 404) {
+            val currentSha = if (fileMetadataResponse.isSuccessful) {
+                val fileMetadata = fileMetadataResponse.body()
+                Log.d("bbbb", "fileMetadata body: $fileMetadata")
+
+                // Ensure we have the current SHA
+                fileMetadata?.sha ?: throw IllegalStateException("File SHA not found")
+            } else null
+
+            // Encode the file content in Base64
+            val encodedContent = android.util.Base64.encodeToString(
+                fileContent.toByteArray(Charsets.UTF_8),
+                android.util.Base64.DEFAULT
+            )
+
+            // Create the request body with the encoded content
+            val createFileRequest = GitHubFileRequest(
+                message = commitMessage,
+                content = encodedContent,
+                sha = currentSha
+            )
+
+            // Make the API call to create the file
+            val response = githubApiService.updateFile(path, createFileRequest)
 
             if (response.isSuccessful) {
+                // File created successfully
                 val fileContent = response.body()
-                if (fileContent != null) {
-
-                    Log.d("bbbb", "content: $fileContent")
-
-                    // Decode the Base64 content of the file
-//                    val decodedContent = String(
-//                        android.util.Base64.decode(
-//                            fileContent.content,
-//                            android.util.Base64.URL_SAFE
-//                        )
-//                    )
-//
-//                    Log.d("GitHub API", "decodedContent: $decodedContent")
-                }
+                Log.d("GitHub API", "File created successfully: $fileContent")
             } else {
-                Log.e("GitHub API", "Error: ${response.code()}")
+                // Handle errors
+                Log.e("GitHub API", "Error creating file: ${response.code()}")
+
+                val errorBody = response.errorBody()?.string()
+                Log.e("GitHub API", "Error creating file: ${response.code()}, $errorBody")
             }
         }
     }

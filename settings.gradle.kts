@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "NewIdeaTodoApp"
 include(":app")
- 
+include(":github-api-lib")

@@ -1,6 +1,6 @@
 package com.mikeapp.newideatodoapp.data.datasource.github
 
-data class GitHubApiFileContent(
+data class GithubFileMetadata(
     val name: String,
     val path: String,
     val sha: String,

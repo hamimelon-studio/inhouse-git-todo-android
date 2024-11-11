@@ -1,7 +1,7 @@
 package com.mikeapp.newideatodoapp.data.datasource
 
 import com.mikeapp.newideatodoapp.BuildConfig
-import com.mikeapp.newideatodoapp.data.datasource.github.GithubOpenApiService
+import com.mikeapp.newideatodoapp.data.datasource.github.GithubApiService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import retrofit2.Retrofit
@@ -29,7 +29,7 @@ object NetworkModule {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val githubApiService = retrofit.create(GithubOpenApiService::class.java)
+    val githubApiService = retrofit.create(GithubApiService::class.java)
 
     const val AUTHORIZATION_HEADER = "Authorization"
     const val BEARER_TOKEN = "Bearer ${BuildConfig.STATIC_API_TOKEN}"
