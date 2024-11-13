@@ -1,8 +1,8 @@
-package com.mikeapp.newideatodoapp.data.repository
+package com.mikeapp.newideatodoapp.data
 
 import android.util.Log
 import com.mikeapp.newideatodoapp.data.datasource.NetworkModule.githubApiService
-import com.mikeapp.newideatodoapp.data.datasource.github.GitHubFileRequest
+import com.mikeapp.newideatodoapp.data.datasource.model.GitHubFileRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,7 +21,7 @@ class GithubOpenApiRepository {
         }
     }
 
-    private suspend fun getExistFileMeta() {
+    private suspend fun getFileMeta() {
         val response = githubApiService.getFileMetadata("todoroot/test1.txt")
         Log.d("bbbb", "response.code: ${response.code()}")
 
@@ -39,7 +39,7 @@ class GithubOpenApiRepository {
         }
     }
 
-    private suspend fun readContentInSingleCall(path: String): String? {
+    suspend fun readFileContent(path: String): String? {
         val response = githubApiService.getFileContent(path)
         val body = response.body()
 
@@ -118,7 +118,7 @@ class GithubOpenApiRepository {
                 content = encodedContent,
                 sha = currentSha
             )
-
+6
             // Make the API call to create the file
             val response = githubApiService.updateFile(path, createFileRequest)
 

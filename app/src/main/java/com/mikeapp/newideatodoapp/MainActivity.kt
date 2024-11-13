@@ -16,17 +16,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.mike.github_api_lib.MyClass
 import com.mikeapp.newideatodoapp.alarm.AlarmStarter
-import com.mikeapp.newideatodoapp.data.repository.GithubOpenApiRepository
+import com.mikeapp.newideatodoapp.data.GithubOpenApiRepository
+import com.mikeapp.newideatodoapp.ui.theme.LoginViewModel
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
     private val alarmStarter = AlarmStarter()
     private val myclass = MyClass()
 
+    private val loginViewModel: LoginViewModel by viewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        GithubOpenApiRepository().test()
+        loginViewModel.login()
+//        GithubOpenApiRepository().test()
         Log.d("bbbb", myclass.test("Mike"))
         setContent {
             NewIdeaTodoAppTheme {

@@ -1,7 +1,6 @@
 package com.mikeapp.newideatodoapp.data.datasource
 
 import com.mikeapp.newideatodoapp.BuildConfig
-import com.mikeapp.newideatodoapp.data.datasource.github.GithubApiService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import retrofit2.Retrofit

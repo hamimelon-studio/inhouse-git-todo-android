@@ -89,5 +89,10 @@ dependencies {
     implementation(libs.okhttp3.logging.interceptor)
     implementation(libs.okhttp3.okhttp)
 
+    // di
+    implementation("io.insert-koin:koin-android:3.2.0")
+//    implementation("io.insert-koin:koin-androidx-viewmodel:3.2.0")
+    implementation("io.insert-koin:koin-androidx-compose:3.2.0")
+
     implementation(project(":github-api-lib"))
 }
