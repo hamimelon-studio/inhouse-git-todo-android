@@ -5,9 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import androidx.annotation.DrawableRes
-import com.mikeapp.newideatodoapp.MainActivity
+import com.mikeapp.newideatodoapp.DebugActivity
 import com.mikeapp.newideatodoapp.R
 
 object NotificationLauncher {
@@ -15,13 +17,21 @@ object NotificationLauncher {
         context: Context,
         title: String,
         msg: String,
+        longMessageToPass: String? = null,
         @DrawableRes icon: Int = R.mipmap.ic_launcher,
     ) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+        val intent = Intent(context, DebugActivity::class.java).apply {
+            longMessageToPass?.let {
+                Log.d("bbbb", "longMessageToPass: $longMessageToPass")
+                putExtra("extra_long_string", longMessageToPass)
+            }
+        }
 
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, MainActivity.intent(context),
-            PendingIntent.FLAG_IMMUTABLE
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,

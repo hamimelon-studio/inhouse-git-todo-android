@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -30,13 +31,40 @@ android {
         }
         val staticApiToken = localProperties.getProperty("staticApi.token", "ci")
         buildConfigField("String", "STATIC_API_TOKEN", "\"$staticApiToken\"")
-//        buildTypes {
-//            getByName("debug") { buildConfigField("String", "staticApiToken", staticApiToken) }
-//            getByName("release") { buildConfigField("String", "staticApiToken", staticApiToken) }
-//        }
+
+        val googleMapApiKey = localProperties.getProperty("googleMapApiKey", "")
+        buildConfigField("String", "googleMapApiKey", "\"$googleMapApiKey\"")
+        resValue("string", "googleMapApiKey", googleMapApiKey ?: "")
+
+        buildConfigField("String", "testLocationHomeLat",
+            "\"${localProperties.getProperty("testLocation.home.lat", "-33.8688")}\"")
+        buildConfigField("String", "testLocationHomeLon",
+            "\"${localProperties.getProperty("testLocation.home.lon", "151.2093")}\"")
+        buildConfigField("String", "testLocationWorkLat",
+            "\"${localProperties.getProperty("testLocation.home.lat", "-33.8688")}\"")
+        buildConfigField("String", "testLocationWorkLon",
+            "\"${localProperties.getProperty("testLocation.home.lon", "151.2093")}\"")
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            val localProperties = Properties()
+            val localPropertiesFile = File(project.rootDir, "local.properties")
+            if (localPropertiesFile.exists()) {
+                localProperties.load(localPropertiesFile.inputStream())  // Load properties into Properties object
+            }
+            storeFile = File(localProperties.getProperty("DEBUG_KEYSTORE_FILE", "/path/to/debug.keystore"))
+            storePassword = localProperties.getProperty("DEBUG_KEYSTORE_PASSWORD", "")
+            keyAlias = localProperties.getProperty("DEBUG_KEY_ALIAS", "")
+            keyPassword = localProperties.getProperty("DEBUG_KEY_PASSWORD", "")
+        }
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -54,6 +82,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -83,16 +112,27 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // network
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit.v290)
+    implementation(libs.converter.gson.v290)
     implementation(libs.gson)
     implementation(libs.okhttp3.logging.interceptor)
     implementation(libs.okhttp3.okhttp)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
+
+    // geo
+    implementation(libs.gms.play.services.location)
+
+    // map
+    implementation(libs.play.services.maps)
+    implementation(libs.gms.play.services.location)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.places)
 
     // di
-    implementation("io.insert-koin:koin-android:3.2.0")
-//    implementation("io.insert-koin:koin-androidx-viewmodel:3.2.0")
-    implementation("io.insert-koin:koin-androidx-compose:3.2.0")
-
-    implementation(project(":github-api-lib"))
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
 }

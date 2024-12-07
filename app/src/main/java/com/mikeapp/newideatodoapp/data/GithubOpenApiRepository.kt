@@ -1,7 +1,7 @@
 package com.mikeapp.newideatodoapp.data
 
 import android.util.Log
-import com.mikeapp.newideatodoapp.data.datasource.NetworkModule.githubApiService
+import com.mikeapp.newideatodoapp.data.NetworkModule.githubApiService
 import com.mikeapp.newideatodoapp.data.datasource.model.GitHubFileRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

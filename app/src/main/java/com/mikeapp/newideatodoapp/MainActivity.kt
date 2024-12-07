@@ -1,12 +1,15 @@
 package com.mikeapp.newideatodoapp
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -14,25 +17,36 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.mike.github_api_lib.MyClass
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.mikeapp.newideatodoapp.alarm.AlarmStarter
-import com.mikeapp.newideatodoapp.data.GithubOpenApiRepository
+import com.mikeapp.newideatodoapp.domain.SupabaseUseCase
+import com.mikeapp.newideatodoapp.geo.GeofenceUseCase
+import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
+import com.mikeapp.newideatodoapp.map.MapActivity
 import com.mikeapp.newideatodoapp.ui.theme.LoginViewModel
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.java.KoinJavaComponent.get
 
 class MainActivity : ComponentActivity() {
     private val alarmStarter = AlarmStarter()
-    private val myclass = MyClass()
 
     private val loginViewModel: LoginViewModel by viewModel()
+
+    private val geofenceUseCase: GeofenceUseCase = get(GeofenceUseCase::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        loginViewModel.login()
+//        loginViewModel.login()
 //        GithubOpenApiRepository().test()
-        Log.d("bbbb", myclass.test("Mike"))
+//        Log.d("bbbb", myclass.test("Mike"))
+
+        // Initialize Firebase Analytics
+        val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
+        geofenceUseCase.requestPermissions(this@MainActivity)
+        geofenceUseCase.register()
         setContent {
             NewIdeaTodoAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -47,7 +61,51 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        val intent = Intent(this@MainActivity, MapActivity::class.java)
+        activityResultLauncher.launch(intent)
+
+//        SupabaseUseCase().test()
+
 //        alarmStarter.setAlarm(this@MainActivity, "2024-11-07", "15:07")
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+            val radius = data?.getDoubleExtra("radius", 0.0)
+
+            // Use latitude, longitude, and radius
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                // Permissions granted
+            } else {
+
+            }
+        }
+    }
+
+    private val activityResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+            val radius = data?.getDoubleExtra("radius", 0.0)
+            Log.d("bbbb", "latitude: $latitude, longitude: $longitude, radius: $radius")
+        }
     }
 
     companion object {
