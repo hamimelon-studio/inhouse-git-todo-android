@@ -69,17 +69,6 @@ class MainActivity : ComponentActivity() {
 //        alarmStarter.setAlarm(this@MainActivity, "2024-11-07", "15:07")
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 100 && resultCode == RESULT_OK) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
-            val radius = data?.getDoubleExtra("radius", 0.0)
-
-            // Use latitude, longitude, and radius
-        }
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
