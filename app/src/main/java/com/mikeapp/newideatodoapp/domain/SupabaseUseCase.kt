@@ -10,7 +10,7 @@ class SupabaseUseCase {
     fun test() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val tasks = supabaseApi.getTasks()
+                val tasks = supabaseApi.getTask()
                 Log.d("bbbb", "test: ${tasks.size}")
                 tasks.forEach {
                     Log.d("bbbb", "test: ${it.name}")
