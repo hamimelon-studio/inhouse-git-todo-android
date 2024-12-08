@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -59,7 +61,9 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.mikeapp.newideatodoapp.BuildConfig
 import com.mikeapp.newideatodoapp.BuildConfig.googleMapApiKey
+import com.mikeapp.newideatodoapp.R
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
+import com.mikeapp.newideatodoapp.ui.extension.adaptEdgeToEdge
 import kotlin.math.ln
 
 class MapActivity : ComponentActivity() {
@@ -67,11 +71,13 @@ class MapActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Initialize Places API with your API key
-        Log.d("bbbb", "googleMapApiKey: $googleMapApiKey")
-        initialisePlaceApi()
-//        if (!Places.isInitialized()) {
-//            Places.initialize(applicationContext, googleMapApiKey)
-//        }
+        Log.d("bbbb", "MAPS_API_KEY: ${BuildConfig.MAPS_API_KEY}")
+//        initialisePlaceApi()
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+        }
+        enableEdgeToEdge()
+        adaptEdgeToEdge(window.decorView)
         setContent {
             MapScreen(onLocationSelected = { latLng, radius ->
                 val resultIntent = Intent().apply {
@@ -113,6 +119,8 @@ class MapActivity : ComponentActivity() {
 
         // Create a new PlacesClient instance
         val placesClient = Places.createClient(this)
+
+        Log.d("bbbb", "placesClient: $placesClient")
     }
 }
 
@@ -222,7 +230,7 @@ fun MapScreen(onLocationSelected: (LatLng, Double) -> Unit) {
                     .padding(bottom = 100.dp)
                     .align(Alignment.BottomEnd)
             ) {
-                Icon(imageVector = Icons.Filled.Home, contentDescription = "Current Location")
+                Icon(painter = painterResource(id = R.drawable.baseline_my_location_24), contentDescription = "Current Location")
             }
         }
 
