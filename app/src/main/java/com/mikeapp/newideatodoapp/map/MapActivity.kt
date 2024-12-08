@@ -57,6 +57,7 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.mikeapp.newideatodoapp.BuildConfig
 import com.mikeapp.newideatodoapp.BuildConfig.googleMapApiKey
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
 import kotlin.math.ln
@@ -67,9 +68,10 @@ class MapActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Initialize Places API with your API key
         Log.d("bbbb", "googleMapApiKey: $googleMapApiKey")
-        if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, googleMapApiKey)
-        }
+        initialisePlaceApi()
+//        if (!Places.isInitialized()) {
+//            Places.initialize(applicationContext, googleMapApiKey)
+//        }
         setContent {
             MapScreen(onLocationSelected = { latLng, radius ->
                 val resultIntent = Intent().apply {
@@ -93,6 +95,24 @@ class MapActivity : ComponentActivity() {
                 // Permission denied, handle appropriately
             }
         }
+    }
+
+    private fun initialisePlaceApi() {
+        // Define a variable to hold the Places API key.
+        val apiKey = BuildConfig.MAPS_API_KEY
+
+        // Log an error if apiKey is not set.
+        if (apiKey.isEmpty() || apiKey == "DEFAULT_API_KEY") {
+            Log.e("Places test", "No api key")
+            finish()
+            return
+        }
+
+        // Initialize the SDK
+        Places.initializeWithNewPlacesApiEnabled(applicationContext, apiKey)
+
+        // Create a new PlacesClient instance
+        val placesClient = Places.createClient(this)
     }
 }
 
