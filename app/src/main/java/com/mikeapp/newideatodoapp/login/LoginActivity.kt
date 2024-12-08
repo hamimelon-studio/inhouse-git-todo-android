@@ -1,6 +1,5 @@
-package com.mikeapp.newideatodoapp
+package com.mikeapp.newideatodoapp.login
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,25 +9,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.mikeapp.newideatodoapp.alarm.AlarmStarter
-import com.mikeapp.newideatodoapp.domain.SupabaseUseCase
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
+import com.mikeapp.newideatodoapp.login.ui.LoginNav
 import com.mikeapp.newideatodoapp.map.MapActivity
+import com.mikeapp.newideatodoapp.ui.extension.adaptEdgeToEdge
 import com.mikeapp.newideatodoapp.ui.theme.LoginViewModel
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.java.KoinJavaComponent.get
 
-class MainActivity : ComponentActivity() {
+class LoginActivity : ComponentActivity() {
     private val alarmStarter = AlarmStarter()
 
     private val loginViewModel: LoginViewModel by viewModel()
@@ -38,33 +34,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-//        loginViewModel.login()
-//        GithubOpenApiRepository().test()
-//        Log.d("bbbb", myclass.test("Mike"))
-
-        // Initialize Firebase Analytics
-        val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-
-        geofenceUseCase.requestPermissions(this@MainActivity)
+        adaptEdgeToEdge(window.decorView)
+        geofenceUseCase.requestPermissions(this@LoginActivity)
         geofenceUseCase.register()
         setContent {
-            NewIdeaTodoAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            LoginNav()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        val intent = Intent(this@MainActivity, MapActivity::class.java)
-        activityResultLauncher.launch(intent)
+        val intent = Intent(this@LoginActivity, MapActivity::class.java)
+//        activityResultLauncher.launch(intent)
 
 //        SupabaseUseCase().test()
+//        SupabaseUseCase().createUser()
 
 //        alarmStarter.setAlarm(this@MainActivity, "2024-11-07", "15:07")
     }
@@ -99,7 +83,7 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         fun intent(context: Context): Intent {
-            val intent = Intent(context, MainActivity::class.java)
+            val intent = Intent(context, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
             return intent
         }

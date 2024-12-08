@@ -1,9 +1,9 @@
 package com.mikeapp.newideatodoapp.data.supabase.model
 
 data class User(
-    val id: Int,
-    val created_at: String,
+    val id: Int? = null,
+    val created_at: String? = null,
     val userName: String,
-    val passwordHash: Boolean,
+    val passwordHash: String,
     val type: String
 )
