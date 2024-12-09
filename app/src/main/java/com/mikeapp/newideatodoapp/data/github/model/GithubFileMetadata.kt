@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.data.datasource.model
+package com.mikeapp.newideatodoapp.data.github.model
 
 data class GithubFileMetadata(
     val name: String,

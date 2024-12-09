@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,14 +29,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mikeapp.newideatodoapp.login.viewmodel.LoginViewModel
+import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(navController: NavController, innerPadding: PaddingValues) {
     val viewModel: LoginViewModel = koinViewModel()
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var rememberMe by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+    var username by remember { mutableStateOf(uiState.userName) }
+    var password by remember { mutableStateOf(uiState.passwordPlaceholder) }
+    var rememberMe by remember { mutableStateOf(true) }
+    val usernameError = uiState.userNameError
+    val passwordError = uiState.passwordError
+    LaunchedEffect(Unit) {
+        runBlocking {
+            viewModel.loadLocalLoginInfo()
+        }?.let {
+            username = it.userName
+            password = it.passwordHash
+            viewModel.autoLogin(localUser = it) {
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -50,27 +70,58 @@ fun LoginScreen(navController: NavController, innerPadding: PaddingValues) {
         )
 
         // Username TextField
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Username") },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = username,
+                onValueChange = {
+                    viewModel.dismissUserNameError()
+                    username = it
+                },
+                label = { Text("Username") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                isError = usernameError != null
+            )
+            usernameError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, bottom = 8.dp)
+                )
+            }
+        }
 
-        // Password TextField
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = password,
+                onValueChange = {
+                    viewModel.dismissPasswordError()
+                    password = it
+                },
+                label = { Text("Password") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                isError = passwordError != null
+            )
+            passwordError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, bottom = 8.dp)
+                )
+            }
+        }
 
         // Remember Me Checkbox
         Row(
@@ -89,17 +140,27 @@ fun LoginScreen(navController: NavController, innerPadding: PaddingValues) {
             )
         }
 
-        // Login Button
-        Button(
-            onClick = {
-                viewModel.login()
-//                    onLoginClick(username, password)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text("Login")
+        // Login Button with Loading State
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(vertical = 16.dp)
+            )
+        } else {
+            Button(
+                onClick = {
+                    viewModel.login(username, password) {
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text("Login")
+            }
         }
 
         // Create New Account Link

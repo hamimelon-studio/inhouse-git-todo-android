@@ -1,14 +1,18 @@
 package com.mikeapp.newideatodoapp.domain
 
 import android.util.Log
-import com.mikeapp.newideatodoapp.data.NetworkModule.supabaseTaskApi
-import com.mikeapp.newideatodoapp.data.NetworkModule.supabaseUserApi
-import com.mikeapp.newideatodoapp.data.supabase.model.User
+import com.mikeapp.newideatodoapp.data.supabase.SupabaseNetworkModule
+import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.get
 
 class SupabaseUseCase {
+    private val supabaseNetworkModule = get<SupabaseNetworkModule>(SupabaseNetworkModule::class.java)
+    private val supabaseTaskApi = supabaseNetworkModule.supabaseTaskApi
+    private val supabaseUserApi = supabaseNetworkModule.supabaseUserApi
+
     fun test() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -27,13 +31,13 @@ class SupabaseUseCase {
     fun createUser() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val user = User(
-                    created_at = System.currentTimeMillis().toString(),
+                val supabaseUser = SupabaseUser(
                     userName = "mike",
                     passwordHash = "1231313",
-                    type = "freeTierUser"
+                    type = "freeTierUser",
+                    email = "william.johnson@example-pet-store.com"
                 )
-                supabaseUserApi.createUser(user = user)
+                supabaseUserApi.createUser(supabaseUser = supabaseUser)
             } catch (e: Exception) {
                 Log.d("bbbb", "createUser: ${e.message}")
                 e.printStackTrace()

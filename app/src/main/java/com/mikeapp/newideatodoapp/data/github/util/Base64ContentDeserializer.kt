@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.data.datasource.util
+package com.mikeapp.newideatodoapp.data.github.util
 
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement

@@ -1,7 +1,7 @@
 package com.mikeapp.newideatodoapp.data.supabase.model
 
-data class Task(
-    val id: Int,
+data class SupabaseTask(
+    val id: Int? = null,
     val name: String,
     val completed: Boolean,
     val location: Int?,

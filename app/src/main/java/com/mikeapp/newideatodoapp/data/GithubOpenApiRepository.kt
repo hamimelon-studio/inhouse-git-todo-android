@@ -1,14 +1,16 @@
 package com.mikeapp.newideatodoapp.data
 
 import android.util.Log
-import com.mikeapp.newideatodoapp.data.NetworkModule.githubApiService
-import com.mikeapp.newideatodoapp.data.datasource.model.GitHubFileRequest
+import com.mikeapp.newideatodoapp.data.github.GithubNetworkModule
+import com.mikeapp.newideatodoapp.data.github.model.GitHubFileRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class GithubOpenApiRepository {
+class GithubOpenApiRepository(networkModule: GithubNetworkModule) {
+    private val githubApiService = networkModule.githubApiService
+
     fun test() {
         CoroutineScope(Dispatchers.IO).launch {
 //            readContentInSingleCall("todoroot/test1.txt")

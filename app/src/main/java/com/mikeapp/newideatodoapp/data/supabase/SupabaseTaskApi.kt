@@ -1,8 +1,7 @@
 package com.mikeapp.newideatodoapp.data.supabase
 
-import com.mikeapp.newideatodoapp.data.supabase.model.Location
-import com.mikeapp.newideatodoapp.data.supabase.model.Task
-import com.mikeapp.newideatodoapp.data.supabase.model.User
+import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseLocation
+import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseTask
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -13,15 +12,15 @@ interface SupabaseTaskApi {
     @GET("/rest/v1/task")
     suspend fun getTask(
         @Query("user") user: Int
-    ): List<Task>
+    ): List<SupabaseTask>
 
     @POST("/rest/v1/task")
     suspend fun insertTask(
-        @Body task: Task
+        @Body supabaseTask: SupabaseTask
     ): Response<Unit>
 
     @GET("/rest/v1/location")
     suspend fun getLocation(
         @Query("user") user: Int
-    ): List<Location>
+    ): List<SupabaseLocation>
 }

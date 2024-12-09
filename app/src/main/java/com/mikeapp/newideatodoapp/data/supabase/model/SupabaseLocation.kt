@@ -1,7 +1,7 @@
 package com.mikeapp.newideatodoapp.data.supabase.model
 
-data class Location(
-    val id: Int,
+data class SupabaseLocation(
+    val id: Int? = null,
     val name: String,
     val lat: Double,
     val lon: Double,

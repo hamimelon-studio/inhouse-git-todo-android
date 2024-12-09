@@ -1,6 +1,6 @@
 package com.mikeapp.newideatodoapp.data.supabase
 
-import com.mikeapp.newideatodoapp.data.supabase.model.User
+import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseUser
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -10,11 +10,17 @@ import retrofit2.http.Query
 interface SupabaseUserApi {
     @POST("/rest/v1/user")
     suspend fun createUser(
-        @Body user: User
+        @Body supabaseUser: SupabaseUser
     ): Response<Unit>
 
     @GET("/rest/v1/user")
     suspend fun getUser(
-        @Query("userName") userName: String
-    ): List<User>
+        @Query("userName") userName: String,
+        @Query("passwordHash") passwordHash: String
+    ): List<SupabaseUser>
+
+    @GET("/rest/v1/user")
+    suspend fun getUserByEmail(
+        @Query("email") email: String,
+    ): List<SupabaseUser>
 }

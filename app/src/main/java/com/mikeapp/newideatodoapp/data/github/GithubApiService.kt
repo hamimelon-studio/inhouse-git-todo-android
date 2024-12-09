@@ -1,10 +1,10 @@
-package com.mikeapp.newideatodoapp.data.datasource
+package com.mikeapp.newideatodoapp.data.github
 
-import com.mikeapp.newideatodoapp.data.datasource.RepoConfig.owner
-import com.mikeapp.newideatodoapp.data.datasource.RepoConfig.repo
-import com.mikeapp.newideatodoapp.data.datasource.model.GitHubFileRequest
-import com.mikeapp.newideatodoapp.data.datasource.model.GithubFileContent
-import com.mikeapp.newideatodoapp.data.datasource.model.GithubFileMetadata
+import com.mikeapp.newideatodoapp.data.github.RepoConfig.owner
+import com.mikeapp.newideatodoapp.data.github.RepoConfig.repo
+import com.mikeapp.newideatodoapp.data.github.model.GitHubFileRequest
+import com.mikeapp.newideatodoapp.data.github.model.GithubFileContent
+import com.mikeapp.newideatodoapp.data.github.model.GithubFileMetadata
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET

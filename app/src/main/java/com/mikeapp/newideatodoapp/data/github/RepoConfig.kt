@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.data.datasource
+package com.mikeapp.newideatodoapp.data.github
 
 object RepoConfig {
     const val owner = "hongwei-bai"

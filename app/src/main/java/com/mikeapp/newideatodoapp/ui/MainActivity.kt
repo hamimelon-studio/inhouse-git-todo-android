@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.login
+package com.mikeapp.newideatodoapp.ui
 
 import android.content.Context
 import android.content.Intent
@@ -16,18 +16,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.mikeapp.newideatodoapp.alarm.AlarmStarter
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
-import com.mikeapp.newideatodoapp.login.ui.LoginNav
 import com.mikeapp.newideatodoapp.map.MapActivity
 import com.mikeapp.newideatodoapp.ui.extension.adaptEdgeToEdge
-import com.mikeapp.newideatodoapp.ui.theme.LoginViewModel
+import com.mikeapp.newideatodoapp.ui.nav.AppNav
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.java.KoinJavaComponent.get
 
-class LoginActivity : ComponentActivity() {
+class MainActivity : ComponentActivity() {
     private val alarmStarter = AlarmStarter()
-
-    private val loginViewModel: LoginViewModel by viewModel()
 
     private val geofenceUseCase: GeofenceUseCase = get(GeofenceUseCase::class.java)
 
@@ -35,16 +31,16 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         adaptEdgeToEdge(window.decorView)
-        geofenceUseCase.requestPermissions(this@LoginActivity)
+        geofenceUseCase.requestPermissions(this@MainActivity)
         geofenceUseCase.register()
         setContent {
-            LoginNav()
+            AppNav()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        val intent = Intent(this@LoginActivity, MapActivity::class.java)
+        val intent = Intent(this@MainActivity, MapActivity::class.java)
 //        activityResultLauncher.launch(intent)
 
 //        SupabaseUseCase().test()
@@ -83,7 +79,7 @@ class LoginActivity : ComponentActivity() {
 
     companion object {
         fun intent(context: Context): Intent {
-            val intent = Intent(context, LoginActivity::class.java)
+            val intent = Intent(context, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
             return intent
         }
