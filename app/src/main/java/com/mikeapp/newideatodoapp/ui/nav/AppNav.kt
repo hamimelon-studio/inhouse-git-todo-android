@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.mikeapp.newideatodoapp.home.MainScreen
+import com.mikeapp.newideatodoapp.home.TodoScreen
 import com.mikeapp.newideatodoapp.login.ui.LoginScreen
 import com.mikeapp.newideatodoapp.login.ui.RegisterScreen
 import com.mikeapp.newideatodoapp.login.ui.RtmLandingScreen
@@ -23,7 +23,7 @@ fun AppNav() {
                 composable("login") { LoginScreen(navController, innerPadding) }
                 composable("register") { RegisterScreen(navController, innerPadding) }
                 composable("rtm_landing") { RtmLandingScreen(navController, innerPadding) }
-                composable("home") { MainScreen(navController, innerPadding) }
+                composable("todo") { TodoScreen(navController, innerPadding) }
             }
         }
     }

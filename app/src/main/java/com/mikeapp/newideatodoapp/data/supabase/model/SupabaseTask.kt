@@ -8,5 +8,5 @@ data class SupabaseTask(
     val priority: Int,
     val due: String?,
     val time: String?,
-    val user: Int
+    val list: Int
 )

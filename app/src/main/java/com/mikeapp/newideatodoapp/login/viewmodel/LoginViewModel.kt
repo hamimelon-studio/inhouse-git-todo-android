@@ -4,28 +4,25 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikeapp.newideatodoapp.Constant.logTag
-import com.mikeapp.newideatodoapp.data.SupabaseRepository
+import com.mikeapp.newideatodoapp.data.UserRepository
 import com.mikeapp.newideatodoapp.data.room.model.UserEntity
 import com.mikeapp.newideatodoapp.login.state.LoginUiState
-import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class LoginViewModel(private val repository: SupabaseRepository) : ViewModel() {
+class LoginViewModel(private val repository: UserRepository) : ViewModel() {
     private var _uiState = MutableStateFlow(LoginUiState())
 
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    fun login(userName: String, password: String, action: () -> Unit) {
+    fun login(userName: String, password: String, isRememberMe: Boolean, action: () -> Unit) {
         _uiState.value = _uiState.value.copy(isLoading = true)
         if (!validateUserName(userName)) return
         if (!validatePassword(password)) return
         viewModelScope.launch {
-            val user = repository.authenticateUser(userName, password)
+            val user = repository.authenticateUser(userName, password, isRememberMe)
             if (user == null) {
                 Log.w(logTag, "Log in failed, get null user name from repository call.")
                 _uiState.value = _uiState.value.copy(
@@ -84,7 +81,7 @@ class LoginViewModel(private val repository: SupabaseRepository) : ViewModel() {
         _uiState.value = localUser?.run {
             LoginUiState(
                 userName = userName,
-                passwordPlaceholder = passwordHash,
+                passwordPlaceholder = "placeholder",
                 isRememberMe = rememberMe
             )
         } ?: LoginUiState(

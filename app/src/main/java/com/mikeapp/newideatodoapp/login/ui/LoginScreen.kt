@@ -48,7 +48,7 @@ fun LoginScreen(navController: NavController, innerPadding: PaddingValues) {
             username = it.userName
             password = it.passwordHash
             viewModel.autoLogin(localUser = it) {
-                navController.navigate("home") {
+                navController.navigate("todo") {
                     popUpTo("login") { inclusive = true }
                 }
             }
@@ -149,8 +149,8 @@ fun LoginScreen(navController: NavController, innerPadding: PaddingValues) {
         } else {
             Button(
                 onClick = {
-                    viewModel.login(username, password) {
-                        navController.navigate("home") {
+                    viewModel.login(username, password, rememberMe) {
+                        navController.navigate("todo") {
                             popUpTo("login") { inclusive = true }
                         }
                     }

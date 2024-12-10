@@ -6,5 +6,6 @@ data class SupabaseUser(
     val userName: String,
     val passwordHash: String,
     val type: String,
-    val email: String
+    val email: String,
+    val nickName: String
 )

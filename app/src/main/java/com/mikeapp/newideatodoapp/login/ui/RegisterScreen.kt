@@ -33,10 +33,12 @@ fun RegisterScreen(navController: NavController, innerPadding: PaddingValues) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var nickName by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val usernameError = uiState.userNameError
     val emailError = uiState.emailError
     val passwordError = uiState.passwordError
+    val nickNameError = uiState.nickNameError
 
     Column(
         modifier = Modifier
@@ -106,6 +108,33 @@ fun RegisterScreen(navController: NavController, innerPadding: PaddingValues) {
             }
         }
 
+        // Nickname TextField
+        Column(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = nickName,
+                onValueChange = {
+                    viewModel.dismissNickNameError()
+                    nickName = it
+                },
+                label = { Text("Nickname") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                isError = nickNameError != null
+            )
+            nickNameError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, bottom = 8.dp)
+                )
+            }
+        }
+
         // Password TextField
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
@@ -143,8 +172,8 @@ fun RegisterScreen(navController: NavController, innerPadding: PaddingValues) {
         } else {
             Button(
                 onClick = {
-                    viewModel.createAccount(username, email, password) {
-                        navController.navigate("home") {
+                    viewModel.createAccount(username, email, password, nickName) {
+                        navController.navigate("todo") {
                             popUpTo("register") { inclusive = true }
                         }
                     }

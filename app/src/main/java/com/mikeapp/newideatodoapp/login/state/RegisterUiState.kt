@@ -5,4 +5,5 @@ data class RegisterUiState(
     val userNameError: String? = null,
     val emailError: String? = null,
     val passwordError: String? = null,
+    val nickNameError: String? = null,
 )

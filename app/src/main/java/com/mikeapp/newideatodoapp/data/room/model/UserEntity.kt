@@ -12,5 +12,6 @@ data class UserEntity(
     val passwordHash: String,
     val type: String,
     val email: String,
-    val rememberMe: Boolean
+    val rememberMe: Boolean,
+    val nickName: String
 )

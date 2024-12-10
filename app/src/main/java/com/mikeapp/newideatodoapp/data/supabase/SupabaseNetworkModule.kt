@@ -1,5 +1,6 @@
 package com.mikeapp.newideatodoapp.data.supabase
 
+import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseVersion
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import retrofit2.Retrofit
@@ -34,7 +35,9 @@ class SupabaseNetworkModule {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val supabaseTaskApi = retrofit.create(SupabaseTaskApi::class.java)
     val supabaseUserApi = retrofit.create(SupabaseUserApi::class.java)
+    val supabaseVersionApi = retrofit.create(SupabaseVersionApi::class.java)
+    val supabaseListApi = retrofit.create(SupabaseListApi::class.java)
+    val supabaseTaskApi = retrofit.create(SupabaseTaskApi::class.java)
     val supabaseLocationApi = retrofit.create(SupabaseLocationApi::class.java)
 }

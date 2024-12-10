@@ -2,33 +2,29 @@ package com.mikeapp.newideatodoapp.data
 
 import android.util.Log
 import com.mikeapp.newideatodoapp.Constant.logTag
+import com.mikeapp.newideatodoapp.data.enums.UserTypeTier
 import com.mikeapp.newideatodoapp.data.room.TnnDatabase
 import com.mikeapp.newideatodoapp.data.room.model.UserEntity
 import com.mikeapp.newideatodoapp.data.supabase.SupabaseNetworkModule
 import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseUser
-import com.mikeapp.newideatodoapp.data.supabase.model.UserTypeTier
 import com.mikeapp.newideatodoapp.util.SecurityUtil
 import org.koin.java.KoinJavaComponent.get
 
-class SupabaseRepository(
+class UserRepository(
     private val room: TnnDatabase,
     networkModule: SupabaseNetworkModule
 ) {
     private val securityUtil = get<SecurityUtil>(SecurityUtil::class.java)
-    private val supabaseUserApi = networkModule.supabaseUserApi
+    private val userApi = networkModule.supabaseUserApi
 
     suspend fun retrieveLocalUser(): UserEntity? {
         val users = room.userDao().getUser()
-        if (users.size > 1) {
-            Log.w(logTag, "users in room db should be always 1, now size is: ${users.size}")
-        }
-
         val user = users.firstOrNull()
         return user
     }
 
-    suspend fun createNewAccount(userName: String, email: String, password: String): UserEntity? {
-        val users = supabaseUserApi.getUserByEmail(eq(email))
+    suspend fun createNewAccount(userName: String, email: String, password: String, nickName: String): UserEntity? {
+        val users = userApi.getUserByName(eq(userName))
         if (users.isNotEmpty()) {
             return null
         }
@@ -37,9 +33,10 @@ class SupabaseRepository(
             userName = userName,
             email = email,
             passwordHash = securityUtil.hashPassword(password),
-            type = UserTypeTier.FreeTier.name
+            type = UserTypeTier.FreeTier.name,
+            nickName = nickName
         )
-        val response = supabaseUserApi.createUser(supabaseUser)
+        val response = userApi.createUser(supabaseUser)
         if (!response.isSuccessful) {
             Log.e(
                 logTag,
@@ -50,7 +47,7 @@ class SupabaseRepository(
             return null
         }
 
-        val response2 = supabaseUserApi.getUserByEmail(eq(email))
+        val response2 = userApi.getUserByName(eq(email))
         if (response2.isEmpty()) {
             Log.e(logTag, "user not created")
             return null
@@ -58,7 +55,7 @@ class SupabaseRepository(
 
         val user = response2.first()
 
-        if(user.id == null || user.created_at == null) {
+        if (user.id == null || user.created_at == null) {
             Log.e(logTag, "user id or created_at is null")
             return null
         }
@@ -70,22 +67,53 @@ class SupabaseRepository(
             email = user.email,
             passwordHash = user.passwordHash,
             type = user.type,
-            rememberMe = true
+            rememberMe = true,
+            nickName = user.nickName.ifEmpty { user.userName }
         )
-        room.userDao().save(roomUserEntity)
+        updateUser(roomUserEntity)
         return roomUserEntity
     }
 
-    suspend fun authenticateUser(userName: String, password: String): SupabaseUser? {
+    suspend fun authenticateUser(userName: String, password: String, rememberMe: Boolean): UserEntity? {
         val passwordHash = securityUtil.hashPassword(password)
-        val response = supabaseUserApi.getUser(eq(userName), eq(passwordHash))
+        val response = userApi.getUser(eq(userName), eq(passwordHash))
         Log.d(logTag, "response: $response")
 
-        return response.firstOrNull()
+        val userEntity = if (response.isNotEmpty()) {
+            val user = response.first()
+            UserEntity(
+                id = user.id ?: 0,
+                created_at = user.created_at ?: "",
+                userName = user.userName,
+                passwordHash = user.passwordHash,
+                type = user.type,
+                email = user.email,
+                rememberMe = rememberMe,
+                nickName = user.nickName
+            )
+        } else null
+        userEntity?.let {
+            updateUser(userEntity)
+        }
+        return userEntity
+    }
+
+    private suspend fun updateUser(userEntity: UserEntity) {
+        val localUser = room.userDao().getUser().firstOrNull()
+        if (localUser?.id == userEntity.id) {
+            room.userDao().save(userEntity)
+        } else {
+            room.userDao().clear()
+            room.listDao().clear()
+            room.taskDao().clear()
+            room.locationDao().clear()
+            room.versionDao().clear()
+            room.userDao().save(userEntity)
+        }
     }
 
     suspend fun authenticateUserHash(userName: String, passwordHash: String): SupabaseUser? {
-        val response = supabaseUserApi.getUser(eq(userName), eq(passwordHash))
+        val response = userApi.getUser(eq(userName), eq(passwordHash))
         Log.d(logTag, "response: $response")
 
         return response.firstOrNull()

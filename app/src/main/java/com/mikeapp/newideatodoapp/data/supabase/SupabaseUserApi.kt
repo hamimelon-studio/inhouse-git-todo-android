@@ -20,7 +20,7 @@ interface SupabaseUserApi {
     ): List<SupabaseUser>
 
     @GET("/rest/v1/user")
-    suspend fun getUserByEmail(
-        @Query("email") email: String,
+    suspend fun getUserByName(
+        @Query("email") userName: String,
     ): List<SupabaseUser>
 }

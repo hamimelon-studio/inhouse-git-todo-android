@@ -4,29 +4,31 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikeapp.newideatodoapp.Constant.logTag
-import com.mikeapp.newideatodoapp.data.SupabaseRepository
-import com.mikeapp.newideatodoapp.login.state.LoginUiState
+import com.mikeapp.newideatodoapp.data.UserRepository
 import com.mikeapp.newideatodoapp.login.state.RegisterUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RegisterViewModel(private val repository: SupabaseRepository) : ViewModel() {
+class RegisterViewModel(private val repository: UserRepository) : ViewModel() {
     private var _uiState = MutableStateFlow(RegisterUiState())
 
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    fun createAccount(userName: String, email: String, password: String, action: () -> Unit) {
+    fun createAccount(userName: String, email: String, password: String, nickName: String, action: () -> Unit) {
         _uiState.value = _uiState.value.copy(isLoading = true)
         if (!validateUserName(userName)) return
         if (!validatePassword(password)) return
         if (!validateEmail(email)) return
         viewModelScope.launch {
-            val user = repository.createNewAccount(userName, email, password)
+            val user = repository.createNewAccount(userName, email, password, nickName)
             if (user == null) {
-                _uiState.value = _uiState.value.copy(isLoading = false, emailError = "Create new account failed, the email address has been registered.")
-                Log.w(logTag, "Create new account failed, the email address has been registered.")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    emailError = "Create new account failed, the username has been registered."
+                )
+                Log.w(logTag, "Create new account failed, the username has been registered.")
             } else {
                 // log in success
                 _uiState.value = _uiState.value.copy(isLoading = false)
@@ -48,6 +50,10 @@ class RegisterViewModel(private val repository: SupabaseRepository) : ViewModel(
         _uiState.value = _uiState.value.copy(passwordError = null)
     }
 
+    fun dismissNickNameError() {
+        _uiState.value = _uiState.value.copy(nickNameError = null)
+    }
+
     private fun validateUserName(userName: String): Boolean {
         if (userName.trim().isEmpty()) {
             _uiState.value = _uiState.value.copy(isLoading = false, userNameError = "Username cannot be empty")
@@ -57,7 +63,10 @@ class RegisterViewModel(private val repository: SupabaseRepository) : ViewModel(
         val usernameRegex = "^[a-zA-Z][a-zA-Z0-9_.-]*$".toRegex()
         if (!usernameRegex.matches(userName)) {
             _uiState.value =
-                _uiState.value.copy(isLoading = false, userNameError = "Invalid username. Please make sure user name starts with letters and only contains letters, numbers, dots, underscores, and hyphens")
+                _uiState.value.copy(
+                    isLoading = false,
+                    userNameError = "Invalid username. Please make sure user name starts with letters and only contains letters, numbers, dots, underscores, and hyphens"
+                )
             return false
         }
 
@@ -72,7 +81,10 @@ class RegisterViewModel(private val repository: SupabaseRepository) : ViewModel(
 
         if (password.trim().length < 6) {
             _uiState.value =
-                _uiState.value.copy(isLoading = false, passwordError = "It doesn't meet the minimum length requirements.")
+                _uiState.value.copy(
+                    isLoading = false,
+                    passwordError = "It doesn't meet the minimum length requirements."
+                )
             return false
         }
 
@@ -81,14 +93,16 @@ class RegisterViewModel(private val repository: SupabaseRepository) : ViewModel(
 
     private fun validateEmail(email: String): Boolean {
         if (email.trim().isEmpty()) {
-            _uiState.value = _uiState.value.copy(isLoading = false, emailError = "Email cannot be empty")
-            return false
+            return true
         }
 
         val emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$".toRegex()
         if (!emailRegex.matches(email)) {
             _uiState.value =
-                _uiState.value.copy(isLoading = false, emailError = "Invalid email format. Please enter a valid email address.")
+                _uiState.value.copy(
+                    isLoading = false,
+                    emailError = "Invalid email format. Please enter a valid email address."
+                )
             return false
         }
 
