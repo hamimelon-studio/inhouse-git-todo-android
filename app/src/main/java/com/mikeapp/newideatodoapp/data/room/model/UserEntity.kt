@@ -13,5 +13,8 @@ data class UserEntity(
     val type: String,
     val email: String,
     val rememberMe: Boolean,
-    val nickName: String
+    val nickName: String,
+    val defaultList: Int,
+    val listVersion: Long,
+    val locationVersion: Long
 )

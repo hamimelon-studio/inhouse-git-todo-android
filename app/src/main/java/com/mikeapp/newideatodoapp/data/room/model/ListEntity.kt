@@ -10,6 +10,5 @@ data class ListEntity(
     val name: String,
     val location: Int?,
     val sort: String?,
-    val type: String?,
-    val version: Long = 0L
+    val taskVersion: Long
 )

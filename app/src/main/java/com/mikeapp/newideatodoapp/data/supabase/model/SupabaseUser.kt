@@ -7,5 +7,8 @@ data class SupabaseUser(
     val passwordHash: String,
     val type: String,
     val email: String,
-    val nickName: String
+    val nickName: String,
+    val defaultList: Int,
+    val listVersion: Long,
+    val locationVersion: Long
 )

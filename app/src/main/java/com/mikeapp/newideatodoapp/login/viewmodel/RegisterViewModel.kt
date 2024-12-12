@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.UserRepository
+import com.mikeapp.newideatodoapp.data.exception.AppException
 import com.mikeapp.newideatodoapp.login.state.RegisterUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,18 +23,16 @@ class RegisterViewModel(private val repository: UserRepository) : ViewModel() {
         if (!validatePassword(password)) return
         if (!validateEmail(email)) return
         viewModelScope.launch {
-            val user = repository.createNewAccount(userName, email, password, nickName)
-            if (user == null) {
+            try {
+                repository.createNewAccount(userName, email, password, nickName)
+                _uiState.value = _uiState.value.copy(isLoading = false)
+                action.invoke()
+            } catch (e: AppException) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    emailError = "Create new account failed, the username has been registered."
+                    userNameError = e.logMessage
                 )
-                Log.w(logTag, "Create new account failed, the username has been registered.")
-            } else {
-                // log in success
-                _uiState.value = _uiState.value.copy(isLoading = false)
-                Log.d("bbbb", "user: $user")
-                action.invoke()
+                Log.w(logTag, e.logMessage)
             }
         }
     }

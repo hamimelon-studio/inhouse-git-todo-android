@@ -6,5 +6,5 @@ data class SupabaseList(
     val location: Int?,
     val sort: String?,
     val user: Int,
-    val type: String?
+    val taskVersion: Long
 )

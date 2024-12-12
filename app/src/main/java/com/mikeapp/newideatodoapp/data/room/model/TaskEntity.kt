@@ -13,6 +13,5 @@ data class TaskEntity(
     val priority: Int,
     val due: String?,
     val time: String?,
-    val list: Int,
-    val version: Long = 0L
+    val list: Int
 )

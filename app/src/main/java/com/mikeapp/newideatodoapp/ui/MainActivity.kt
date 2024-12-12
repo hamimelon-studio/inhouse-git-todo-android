@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        adaptEdgeToEdge(window.decorView)
+//        adaptEdgeToEdge(window.decorView)
         geofenceUseCase.requestPermissions(this@MainActivity)
         geofenceUseCase.register()
         setContent {

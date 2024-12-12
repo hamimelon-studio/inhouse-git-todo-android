@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.UserRepository
+import com.mikeapp.newideatodoapp.data.exception.AppException
 import com.mikeapp.newideatodoapp.data.room.model.UserEntity
 import com.mikeapp.newideatodoapp.login.state.LoginUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,18 +23,16 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
         if (!validateUserName(userName)) return
         if (!validatePassword(password)) return
         viewModelScope.launch {
-            val user = repository.authenticateUser(userName, password, isRememberMe)
-            if (user == null) {
-                Log.w(logTag, "Log in failed, get null user name from repository call.")
+            try {
+                repository.authenticateUser(userName, password, isRememberMe)
+                _uiState.value = _uiState.value.copy(isLoading = false)
+                action.invoke()
+            } catch (e: AppException) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    passwordError = "Log in failed, please check your username and password."
+                    userNameError = e.logMessage
                 )
-            } else {
-                // log in success
-                _uiState.value = _uiState.value.copy(isLoading = false)
-                Log.d("bbbb", "user: $user")
-                action.invoke()
+                Log.w(logTag, e.logMessage)
             }
         }
     }

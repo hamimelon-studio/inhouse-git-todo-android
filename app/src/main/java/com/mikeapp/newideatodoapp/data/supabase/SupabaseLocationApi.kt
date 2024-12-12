@@ -7,6 +7,6 @@ import retrofit2.http.Query
 interface SupabaseLocationApi {
     @GET("/rest/v1/location")
     suspend fun getLocation(
-        @Query("user") user: Int
+        @Query("user") user: String
     ): List<SupabaseLocation>
 }

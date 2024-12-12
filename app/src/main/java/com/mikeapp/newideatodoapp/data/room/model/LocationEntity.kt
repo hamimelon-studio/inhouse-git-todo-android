@@ -10,6 +10,5 @@ data class LocationEntity(
     val name: String,
     val lat: Double,
     val lon: Double,
-    val radius: Double,
-    val version: Long = 0L
+    val radius: Double
 )
