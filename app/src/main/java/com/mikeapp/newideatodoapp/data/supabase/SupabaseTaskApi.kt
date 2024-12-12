@@ -5,6 +5,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface SupabaseTaskApi {
@@ -26,6 +27,11 @@ interface SupabaseTaskApi {
 
     @POST("/rest/v1/task")
     suspend fun insertTask(
+        @Body supabaseTask: SupabaseTask
+    ): Response<Unit>
+
+    @PUT("/rest/v1/task")
+    suspend fun updateTask(
         @Body supabaseTask: SupabaseTask
     ): Response<Unit>
 }

@@ -108,7 +108,7 @@ fun TodoScreen(navController: NavController, paddingValues: PaddingValues) {
                     .fillMaxSize()
             ) {
                 items(uiState.tasks) { todo ->
-                    TodoItemCard(todo)
+                    TodoItemCard(navController, todo)
                 }
             }
         }
@@ -125,7 +125,7 @@ fun TodoItemCard(navController: NavController, todo: TaskEntity) {
             containerColor = MaterialTheme.colorScheme.surface
         ),
         onClick = {
-
+            navController.navigate("add/${todo.id}")
         }
     ) {
         Row(

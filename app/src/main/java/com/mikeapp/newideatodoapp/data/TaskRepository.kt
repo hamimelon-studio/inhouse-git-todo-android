@@ -31,6 +31,30 @@ class TaskRepository(
         updateTaskVersion(localList.id)
     }
 
+    suspend fun updateTask(taskId: Int, taskName: String) {
+        val taskEntity = getTaskFromRoomDb(taskId)
+        val taskEntityNew = taskEntity.copy(
+            name = taskName
+        )
+        room.taskDao().save(taskEntityNew)
+        val task = mapToTask(taskEntityNew)
+        taskApi.updateTask(task)
+        updateTaskVersion(taskEntityNew.list)
+    }
+
+    private fun mapToTask(taskEntity: TaskEntity): SupabaseTask {
+        return SupabaseTask(
+            id = taskEntity.id,
+            name = taskEntity.name,
+            completed = taskEntity.completed,
+            location = taskEntity.location,
+            priority = taskEntity.priority,
+            due = taskEntity.due,
+            time = taskEntity.time,
+            list = taskEntity.list
+        )
+    }
+
     suspend fun getUser(): UserEntity {
         return getUserFromRoomDb()
     }
@@ -50,6 +74,14 @@ class TaskRepository(
             getDefaultList()
         }
         return room.taskDao().getTasks(localList.id)
+    }
+
+    suspend fun getTask(taskId: Int): TaskEntity {
+        return getTaskFromRoomDb(taskId)
+    }
+
+    private suspend fun getTaskFromRoomDb(taskId: Int): TaskEntity {
+        return room.taskDao().getTask(taskId) ?: throw CodeLogicException("task $taskId is null")
     }
 
     private suspend fun getLocalListById(listId: Int): ListEntity {

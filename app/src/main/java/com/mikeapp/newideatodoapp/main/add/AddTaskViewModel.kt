@@ -13,15 +13,24 @@ class AddTaskViewModel(private val repository: TaskRepository) : ViewModel() {
 
     val uiState: StateFlow<AddTaskUiState> = _uiState.asStateFlow()
 
-    fun load() {
-        viewModelScope.launch {
-
+    fun load(taskId: Int? = null) {
+        taskId?.let {
+            viewModelScope.launch {
+                val task = repository.getTask(taskId)
+                _uiState.value = _uiState.value.copy(
+                    taskName = task.name
+                )
+            }
         }
     }
 
-    fun saveTask(taskName: String, onCompleted: () -> Unit) {
+    fun saveTask(taskName: String, taskId: Int? = null, onCompleted: () -> Unit) {
         viewModelScope.launch {
-            repository.addTask(taskName)
+            if(taskId != null) {
+                repository.updateTask(taskId, taskName)
+            } else {
+                repository.addTask(taskName)
+            }
             onCompleted.invoke()
         }
     }

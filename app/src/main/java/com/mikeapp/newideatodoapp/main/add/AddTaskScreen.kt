@@ -1,5 +1,6 @@
 package com.mikeapp.newideatodoapp.main.add
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,16 +40,26 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.R
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues) {
+fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, taskId: Int? = null) {
     val viewModel: AddTaskViewModel = koinViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val scope = rememberCoroutineScope()
     var newTaskTitle by remember { mutableStateOf("") }
+
+    Log.d(logTag, "AddTaskScreen get called, uiState.taskName: ${uiState.taskName}")
+    LaunchedEffect(Unit) {
+        viewModel.load(taskId)
+    }
+
+    LaunchedEffect(uiState.taskName) {
+        newTaskTitle = uiState.taskName
+    }
 
     Scaffold(
         topBar = {
@@ -65,7 +77,7 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues) {
                 title = { Text("Save Task") },
                 actions = {
                     IconButton(onClick = {
-                        viewModel.saveTask(newTaskTitle) {
+                        viewModel.saveTask(newTaskTitle, taskId) {
                             navController.navigate("todo")
                         }
                     }) {
