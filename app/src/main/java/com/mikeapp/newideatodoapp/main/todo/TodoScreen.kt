@@ -1,5 +1,6 @@
 package com.mikeapp.newideatodoapp.main.todo
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.R
 import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
 import kotlinx.coroutines.launch
@@ -47,6 +50,10 @@ fun TodoScreen(navController: NavController, paddingValues: PaddingValues) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        viewModel.load()
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -109,14 +116,17 @@ fun TodoScreen(navController: NavController, paddingValues: PaddingValues) {
 }
 
 @Composable
-fun TodoItemCard(todo: TaskEntity) {
+fun TodoItemCard(navController: NavController, todo: TaskEntity) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        )
+        ),
+        onClick = {
+
+        }
     ) {
         Row(
             modifier = Modifier.padding(8.dp),

@@ -65,8 +65,9 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues) {
                 title = { Text("Save Task") },
                 actions = {
                     IconButton(onClick = {
-                        viewModel.saveTask(newTaskTitle)
-                        navController.popBackStack()
+                        viewModel.saveTask(newTaskTitle) {
+                            navController.navigate("todo")
+                        }
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }

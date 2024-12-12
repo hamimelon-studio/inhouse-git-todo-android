@@ -1,7 +1,9 @@
 package com.mikeapp.newideatodoapp.main.todo
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.TaskRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,10 +14,6 @@ class TodoViewModel(private val repository: TaskRepository) : ViewModel() {
     private var _uiState = MutableStateFlow(TodoUiState())
 
     val uiState: StateFlow<TodoUiState> = _uiState.asStateFlow()
-
-    init {
-        load()
-    }
 
     fun load() {
         viewModelScope.launch {

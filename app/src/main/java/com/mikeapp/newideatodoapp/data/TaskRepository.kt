@@ -44,7 +44,6 @@ class TaskRepository(
     }
 
     suspend fun getTasks(listId: Int? = null): List<TaskEntity> {
-        val userId = getUserIdFromRoomDb()
         val localList = if (listId != null) {
             getLocalList(listId)
         } else {

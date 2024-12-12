@@ -19,9 +19,10 @@ class AddTaskViewModel(private val repository: TaskRepository) : ViewModel() {
         }
     }
 
-    fun saveTask(taskName: String) {
+    fun saveTask(taskName: String, onCompleted: () -> Unit) {
         viewModelScope.launch {
             repository.addTask(taskName)
+            onCompleted.invoke()
         }
     }
 }
