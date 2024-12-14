@@ -10,8 +10,13 @@ import retrofit2.http.Query
 
 interface SupabaseListApi {
     @GET("/rest/v1/list")
-    suspend fun getList(
+    suspend fun getLists(
         @Query("user") user: String
+    ): List<SupabaseList>
+
+    @GET("/rest/v1/list")
+    suspend fun getList(
+        @Query("id") id: String
     ): List<SupabaseList>
 
     @POST("/rest/v1/list")

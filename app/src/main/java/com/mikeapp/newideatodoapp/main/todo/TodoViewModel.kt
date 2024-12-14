@@ -1,10 +1,10 @@
 package com.mikeapp.newideatodoapp.main.todo
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.TaskRepository
+import com.mikeapp.newideatodoapp.data.exception.AppException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,8 +18,8 @@ class TodoViewModel(private val repository: TaskRepository) : ViewModel() {
     fun load() {
         viewModelScope.launch {
             val user = repository.getUser()
-            val tasks = repository.getTasks()
             val lists = repository.getLists()
+            val tasks = repository.getTasks()
             val currentList = repository.getList(user.defaultList)
             _uiState.value = TodoUiState(
                 userName = user.nickName,
@@ -27,6 +27,30 @@ class TodoViewModel(private val repository: TaskRepository) : ViewModel() {
                 tasks = tasks,
                 lists = lists
             )
+        }
+    }
+
+    fun forceRefresh() {
+        _uiState.value = _uiState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            try {
+                val user = repository.getUser()
+                val lists = repository.getLists()
+                val tasks = repository.getTasks()
+
+                val currentList = repository.getList(user.defaultList)
+                delay(400)
+                _uiState.value = TodoUiState(
+                    isLoading = false,
+                    userName = user.nickName,
+                    currentList = currentList,
+                    tasks = tasks,
+                    lists = lists
+                )
+            } catch (e: AppException) {
+                delay(400)
+                _uiState.value = _uiState.value.copy(isLoading = false)
+            }
         }
     }
 }

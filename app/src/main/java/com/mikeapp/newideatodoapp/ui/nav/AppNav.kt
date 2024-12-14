@@ -12,6 +12,7 @@ import com.mikeapp.newideatodoapp.login.ui.RegisterScreen
 import com.mikeapp.newideatodoapp.login.ui.RtmLandingScreen
 import com.mikeapp.newideatodoapp.main.add.AddTaskScreen
 import com.mikeapp.newideatodoapp.main.todo.TodoScreen
+import com.mikeapp.newideatodoapp.ui.DesignScreen
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
 
 @Composable
@@ -34,6 +35,7 @@ fun AppNav() {
                     val taskId = backStackEntry.arguments?.getInt("taskId")
                     AddTaskScreen(navController, innerPadding, taskId)
                 }
+                composable("design") { DesignScreen() }
             }
         }
     }

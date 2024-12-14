@@ -76,7 +76,7 @@ class UserRepository(
 
     private suspend fun incrementalUpdateListAndTask(user: SupabaseUser, userEntity: UserEntity) {
         if (userEntity.listVersion < user.listVersion) {
-            val lists = listApi.getList(eq(userEntity.id))
+            val lists = listApi.getLists(eq(userEntity.id))
             val listEntities = lists.map {
                 if (it.id == null) throw BackendAppException("list id should never be null")
                 ListEntity(
@@ -138,7 +138,7 @@ class UserRepository(
     }
 
     private suspend fun downloadListAndTaskFromCloud(userId: Int) {
-        val lists = listApi.getList(eq(userId))
+        val lists = listApi.getLists(eq(userId))
         val listEntities = lists.map {
             if (it.id == null) throw BackendAppException("list id should never be null")
             ListEntity(
@@ -223,7 +223,7 @@ class UserRepository(
     }
 
     private suspend fun getDefaultList(userId: Int): SupabaseList {
-        val response = listApi.getList(eq(userId))
+        val response = listApi.getLists(eq(userId))
         if (response.isEmpty()) {
             throw BackendAppException("default list not created")
         }

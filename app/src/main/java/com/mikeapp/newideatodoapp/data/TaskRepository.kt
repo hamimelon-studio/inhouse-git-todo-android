@@ -76,6 +76,23 @@ class TaskRepository(
         return room.taskDao().getTasks(localList.id)
     }
 
+    suspend fun forceUpdateTasks(listId: Int? = null): List<TaskEntity> {
+        val localList = if (listId != null) {
+            getLocalList(listId)
+        } else {
+            getDefaultList()
+        }
+        val list = loadListByIdFromCloud(localList.id)
+        if (localList.taskVersion < list.taskVersion) {
+            val tasks = fetchTasksByListFromCloud(localList.id)
+            val taskEntities = tasks.map { getTaskEntity(it) }
+            room.taskDao().saveAll(taskEntities)
+            return taskEntities
+        } else {
+            return room.taskDao().getTasks(localList.id)
+        }
+    }
+
     suspend fun getTask(taskId: Int): TaskEntity {
         return getTaskFromRoomDb(taskId)
     }
@@ -119,6 +136,10 @@ class TaskRepository(
             time = task.time,
             list = task.list
         )
+    }
+
+    private suspend fun fetchTasksByListFromCloud(listId: Int): List<SupabaseTask> {
+        return taskApi.getTasks(eq(listId))
     }
 
     private suspend fun fetchTaskFromCloud(taskName: String, listId: Int): SupabaseTask {
@@ -177,8 +198,14 @@ class TaskRepository(
         room.listDao().saveAll(listEntities)
     }
 
-    private suspend fun loadListFromCloud(userId: Int): List<SupabaseList> {
+    private suspend fun loadListByIdFromCloud(userId: Int): SupabaseList {
         val lists = listApi.getList(eq(userId))
+        if (lists.isEmpty()) throw BackendAppException("fetch lists from supabase get empty results")
+        return lists.first()
+    }
+
+    private suspend fun loadListsFromCloud(userId: Int): List<SupabaseList> {
+        val lists = listApi.getLists(eq(userId))
         if (lists.isEmpty()) throw BackendAppException("fetch lists from supabase get empty results")
         return lists
     }
