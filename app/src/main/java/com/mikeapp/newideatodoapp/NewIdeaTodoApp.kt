@@ -6,6 +6,7 @@ import android.content.pm.SigningInfo
 import android.os.Build
 import android.util.Base64
 import android.util.Log
+import com.google.android.libraries.places.api.Places
 import com.google.firebase.FirebaseApp
 import com.mikeapp.newideatodoapp.data.firebase.FirebaseUseCase
 import com.mikeapp.newideatodoapp.di.appModule
@@ -24,6 +25,13 @@ class NewIdeaTodoApp : Application() {
             modules(appModule)
         }
         checkSign()
+        initialisePlace()
+    }
+
+    private fun initialisePlace() {
+        if (!Places.isInitialized()) {
+            Places.initialize(this, BuildConfig.MAPS_API_KEY)
+        }
     }
 
     private fun checkSign() {

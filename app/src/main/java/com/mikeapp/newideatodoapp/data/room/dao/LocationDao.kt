@@ -4,11 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.mikeapp.newideatodoapp.data.room.model.ListEntity
 import com.mikeapp.newideatodoapp.data.room.model.LocationEntity
 
 @Dao
 interface LocationDao {
+    @Query("SELECT * FROM location")
+    suspend fun getLocations(): List<LocationEntity>
+
     @Query("SELECT * FROM location WHERE id = :id")
     suspend fun getLocation(id: Int): LocationEntity?
     

@@ -12,7 +12,8 @@ import com.mikeapp.newideatodoapp.login.ui.RegisterScreen
 import com.mikeapp.newideatodoapp.login.ui.RtmLandingScreen
 import com.mikeapp.newideatodoapp.main.add.AddTaskScreen
 import com.mikeapp.newideatodoapp.main.todo.TodoScreen
-import com.mikeapp.newideatodoapp.ui.DesignScreen
+import com.mikeapp.newideatodoapp.map.GoogleMapScreen
+import com.mikeapp.newideatodoapp.ui.theme.DesignScreen
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
 
 @Composable
@@ -28,12 +29,18 @@ fun AppNav() {
                 composable("register") { RegisterScreen(navController, innerPadding) }
                 composable("rtm_landing") { RtmLandingScreen(navController, innerPadding) }
                 composable("todo") { TodoScreen(navController, innerPadding) }
+                composable("add") { AddTaskScreen(navController, innerPadding) }
                 composable(
                     "add/{taskId}",
                     arguments = listOf(navArgument("taskId") { type = NavType.IntType })
                 ) { backStackEntry ->
                     val taskId = backStackEntry.arguments?.getInt("taskId")
                     AddTaskScreen(navController, innerPadding, taskId)
+                }
+                composable("maps") {
+                    GoogleMapScreen(onLocationSelected = { latLng, radius ->
+                        navController.popBackStack()
+                    })
                 }
                 composable("design") { DesignScreen() }
             }

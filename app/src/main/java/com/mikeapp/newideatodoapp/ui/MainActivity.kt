@@ -17,9 +17,9 @@ import com.mikeapp.newideatodoapp.alarm.AlarmStarter
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
 import com.mikeapp.newideatodoapp.map.MapActivity
-import com.mikeapp.newideatodoapp.ui.extension.adaptEdgeToEdge
 import com.mikeapp.newideatodoapp.ui.nav.AppNav
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
+import com.mikeapp.newideatodoapp.ui.theme.SetSystemBarsColor
 import org.koin.java.KoinJavaComponent.get
 
 class MainActivity : ComponentActivity() {
@@ -34,9 +34,12 @@ class MainActivity : ComponentActivity() {
         geofenceUseCase.requestPermissions(this@MainActivity)
         geofenceUseCase.register()
         setContent {
+            SetSystemBarsColor()
             AppNav()
         }
     }
+
+
 
     override fun onResume() {
         super.onResume()
