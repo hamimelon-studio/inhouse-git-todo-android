@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikeapp.newideatodoapp.data.LocationRepository
 import com.mikeapp.newideatodoapp.data.TaskRepository
+import com.mikeapp.newideatodoapp.data.room.model.TaskDraftEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +56,40 @@ class AddTaskViewModel(
                 )
             }
             _locationUiState.value = LocationUiState(locationUiList)
+        }
+    }
+
+    fun saveDraft(taskName: String, taskId: Int?) {
+        viewModelScope.launch {
+            repository.saveDraft(
+                TaskDraftEntity(
+                    taskId = taskId,
+                    name = taskName,
+                    completed = false,
+                    location = null,
+                    priority = 1,
+                    due = null,
+                    time = null,
+                    list = 1
+                )
+            )
+        }
+    }
+
+    fun loadDraft() {
+        viewModelScope.launch {
+            val draft = repository.getDraft()
+            if (draft != null) {
+                _uiState.value = _uiState.value.copy(
+                    taskName = draft.name
+                )
+            }
+        }
+    }
+
+    fun clearDraft() {
+        viewModelScope.launch {
+            repository.clearDraft()
         }
     }
 }

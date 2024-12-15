@@ -3,7 +3,9 @@ package com.mikeapp.newideatodoapp.data
 import com.mikeapp.newideatodoapp.data.exception.BackendAppException
 import com.mikeapp.newideatodoapp.data.exception.CodeLogicException
 import com.mikeapp.newideatodoapp.data.room.TnnDatabase
+import com.mikeapp.newideatodoapp.data.room.dao.TaskDraftDao
 import com.mikeapp.newideatodoapp.data.room.model.ListEntity
+import com.mikeapp.newideatodoapp.data.room.model.TaskDraftEntity
 import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
 import com.mikeapp.newideatodoapp.data.room.model.UserEntity
 import com.mikeapp.newideatodoapp.data.supabase.SupabaseNetworkModule
@@ -16,6 +18,18 @@ class TaskRepository(
 ) {
     private val listApi = networkModule.supabaseListApi
     private val taskApi = networkModule.supabaseTaskApi
+
+    suspend fun saveDraft(taskDraftEntity: TaskDraftEntity) {
+        room.taskDraftDao().saveDraft(taskDraftEntity)
+    }
+
+    suspend fun getDraft(): TaskDraftEntity? {
+        return room.taskDraftDao().getDraft()
+    }
+
+    suspend fun clearDraft() {
+        room.taskDraftDao().clear()
+    }
 
     suspend fun addTask(taskName: String, listId: Int? = null) {
         val localList = if (listId != null) {

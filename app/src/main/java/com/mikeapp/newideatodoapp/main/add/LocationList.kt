@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.google.android.libraries.places.api.Places
-import com.mikeapp.newideatodoapp.BuildConfig
 import com.mikeapp.newideatodoapp.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -50,6 +48,10 @@ fun LocationList(navController: NavController, modifier: Modifier, onSelected: (
         }
     }
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.loadLocationList()
+    }
 
     Column(
         modifier = modifier.fillMaxWidth()

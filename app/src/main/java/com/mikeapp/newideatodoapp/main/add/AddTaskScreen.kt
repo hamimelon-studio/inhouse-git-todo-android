@@ -1,11 +1,8 @@
 package com.mikeapp.newideatodoapp.main.add
 
-import android.Manifest
 import android.graphics.Rect
 import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -95,6 +92,7 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
 
     LaunchedEffect(Unit) {
         viewModel.load(taskId)
+        viewModel.loadDraft()
         focusRequester.requestFocus()
     }
 
@@ -107,6 +105,7 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = {
+                        viewModel.clearDraft()
                         navController.popBackStack()
                     }) {
                         Icon(
@@ -120,6 +119,7 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
                 actions = {
                     IconButton(onClick = {
                         viewModel.saveTask(newTaskTitle, taskId) {
+                            viewModel.clearDraft()
                             navController.navigate("todo")
                         }
                     }) {
@@ -230,7 +230,10 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = "Location",
                     tint = iconTint,
-                    modifier = iconModifier.clickable { showLocationSelection = true }
+                    modifier = iconModifier.clickable {
+                        viewModel.saveDraft(taskName = newTaskTitle, taskId = taskId)
+                        showLocationSelection = true
+                    }
                 )
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.baseline_list_alt_24),
