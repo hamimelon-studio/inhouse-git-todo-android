@@ -1,10 +1,15 @@
-package com.mikeapp.newideatodoapp.main.add
+package com.mikeapp.newideatodoapp.main.add.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.LocationRepository
 import com.mikeapp.newideatodoapp.data.TaskRepository
 import com.mikeapp.newideatodoapp.data.room.model.TaskDraftEntity
+import com.mikeapp.newideatodoapp.main.add.model.AddTaskUiState
+import com.mikeapp.newideatodoapp.main.add.model.LocationUi
+import com.mikeapp.newideatodoapp.main.add.model.LocationUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +28,7 @@ class AddTaskViewModel(
     val locationUiState: StateFlow<LocationUiState> = _locationUiState.asStateFlow()
 
     fun load(taskId: Int? = null) {
+        Log.d(logTag, "load: $taskId")
         taskId?.let {
             viewModelScope.launch {
                 val task = repository.getTask(taskId)

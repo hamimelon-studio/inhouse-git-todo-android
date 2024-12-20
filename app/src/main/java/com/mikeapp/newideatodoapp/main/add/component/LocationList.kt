@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.main.add
+package com.mikeapp.newideatodoapp.main.add.component
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -28,6 +28,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mikeapp.newideatodoapp.R
+import com.mikeapp.newideatodoapp.main.add.model.LocationUi
+import com.mikeapp.newideatodoapp.main.add.viewmodel.AddTaskViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -77,16 +79,17 @@ fun LocationList(navController: NavController, modifier: Modifier, onSelected: (
                 )
             }
         }
-        Spacer(
-            Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-        )
+        if (uiState.locations.isNotEmpty()) {
+            Spacer(
+                Modifier
+                    .fillMaxWidth()
+                    .height(32.dp)
+            )
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
                 .clickable {
                     val allGranted = permissions.all { permission ->
                         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
@@ -97,6 +100,7 @@ fun LocationList(navController: NavController, modifier: Modifier, onSelected: (
                         launcher.launch(permissions)
                     }
                 }
+                .padding(16.dp)
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.baseline_add_24),

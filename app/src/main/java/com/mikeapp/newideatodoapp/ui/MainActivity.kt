@@ -13,17 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.lifecycleScope
 import com.mikeapp.newideatodoapp.alarm.AlarmStarter
 import com.mikeapp.newideatodoapp.data.TaskRepository
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
-import com.mikeapp.newideatodoapp.main.add.AddTaskViewModel
 import com.mikeapp.newideatodoapp.map.MapActivity
 import com.mikeapp.newideatodoapp.ui.nav.AppNav
 import com.mikeapp.newideatodoapp.ui.theme.NewIdeaTodoAppTheme
 import com.mikeapp.newideatodoapp.ui.theme.SetSystemBarsColor
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.java.KoinJavaComponent.get
 import org.koin.java.KoinJavaComponent.inject

@@ -1,7 +1,5 @@
-package com.mikeapp.newideatodoapp.main.todo
+package com.mikeapp.newideatodoapp.main.todo.component
 
-import android.util.Log
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
@@ -13,16 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,11 +36,10 @@ import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
-import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.R
 import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
 
-@OptIn(ExperimentalWearMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalWearMaterialApi::class)
 @Composable
 fun TodoItemCardWithSwipe(
     navController: NavController,
@@ -57,14 +50,7 @@ fun TodoItemCardWithSwipe(
     val sizePx = with(LocalDensity.current) { 200.dp.toPx() }
     val anchors = mapOf(0f to 0, -sizePx to 1, sizePx to 2)
     val swipeOffset = swipeableState.offset.value
-//    val iconSize = remember { Animatable(0f) }
     val swipeAreaColor: MutableState<Color?> = remember { mutableStateOf(null) }
-
-    // Animate tick size based on swipe offset
-//    LaunchedEffect(swipeOffset) {
-//        val normalizedSize = (swipeOffset / sizePx).coerceIn(0f, 1f)
-//        iconSize.animateTo(normalizedSize)
-//    }
 
     Box(
         modifier = Modifier

@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.main.add
+package com.mikeapp.newideatodoapp.main.add.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

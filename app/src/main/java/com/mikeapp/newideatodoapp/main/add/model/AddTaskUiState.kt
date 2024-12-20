@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.main.add
+package com.mikeapp.newideatodoapp.main.add.model
 
 data class AddTaskUiState(
     val isLoading: Boolean = false,

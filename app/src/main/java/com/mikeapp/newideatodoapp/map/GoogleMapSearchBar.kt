@@ -43,7 +43,7 @@ import com.mikeapp.newideatodoapp.R
 import com.mikeapp.newideatodoapp.ui.theme.UltraLightGray
 
 @Composable
-fun GoogleMapSearchBar(modifier: Modifier, onSelect: (LatLng) -> Unit) {
+fun GoogleMapSearchBar(modifier: Modifier, onSelect: (String, LatLng) -> Unit) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         if (!Places.isInitialized()) {
@@ -159,7 +159,7 @@ fun GoogleMapSearchBar(modifier: Modifier, onSelect: (LatLng) -> Unit) {
                                 results
                                     ?.firstOrNull()
                                     ?.let {
-                                        onSelect.invoke(LatLng(it.latitude, it.longitude))
+                                        onSelect.invoke(suggestion, LatLng(it.latitude, it.longitude))
                                     }
                                 isDropdownVisible = false
                                 showFullScreen = false

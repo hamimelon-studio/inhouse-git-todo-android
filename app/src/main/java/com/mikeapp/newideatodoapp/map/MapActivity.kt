@@ -25,15 +25,15 @@ class MapActivity : ComponentActivity() {
         enableEdgeToEdge()
         adaptEdgeToEdge(window.decorView)
         setContent {
-            GoogleMapScreen(onLocationSelected = { latLng, radius ->
-                val resultIntent = Intent().apply {
-                    putExtra("latitude", latLng.latitude)
-                    putExtra("longitude", latLng.longitude)
-                    putExtra("radius", radius)
-                }
-                setResult(RESULT_OK, resultIntent)
-                finish()
-            })
+//            GoogleMapScreen(onLocationSelected = { latLng, radius ->
+//                val resultIntent = Intent().apply {
+//                    putExtra("latitude", latLng.latitude)
+//                    putExtra("longitude", latLng.longitude)
+//                    putExtra("radius", radius)
+//                }
+//                setResult(RESULT_OK, resultIntent)
+//                finish()
+//            })
         }
     }
 

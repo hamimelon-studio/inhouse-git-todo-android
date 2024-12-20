@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.main.todo
+package com.mikeapp.newideatodoapp.main.todo.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mikeapp.newideatodoapp.R
+import com.mikeapp.newideatodoapp.main.todo.TodoViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

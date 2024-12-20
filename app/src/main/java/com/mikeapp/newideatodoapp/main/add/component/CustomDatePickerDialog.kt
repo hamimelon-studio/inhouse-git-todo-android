@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.main.add
+package com.mikeapp.newideatodoapp.main.add.component
 
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog

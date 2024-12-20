@@ -37,11 +37,7 @@ fun AppNav() {
                     val taskId = backStackEntry.arguments?.getInt("taskId")
                     AddTaskScreen(navController, innerPadding, taskId)
                 }
-                composable("maps") {
-                    GoogleMapScreen(onLocationSelected = { latLng, radius ->
-                        navController.popBackStack()
-                    })
-                }
+                composable("maps") { GoogleMapScreen(navController) }
                 composable("design") { DesignScreen() }
             }
         }

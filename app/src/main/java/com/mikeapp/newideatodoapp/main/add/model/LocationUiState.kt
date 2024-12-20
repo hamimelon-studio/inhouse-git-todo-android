@@ -1,4 +1,4 @@
-package com.mikeapp.newideatodoapp.main.add
+package com.mikeapp.newideatodoapp.main.add.model
 
 data class LocationUiState(
     val locations: List<LocationUi> = emptyList()

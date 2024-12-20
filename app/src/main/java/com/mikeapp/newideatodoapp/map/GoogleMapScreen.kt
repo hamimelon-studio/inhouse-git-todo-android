@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -49,7 +49,7 @@ import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISS
 import kotlin.math.ln
 
 @Composable
-fun GoogleMapScreen(onLocationSelected: (LatLng, Double) -> Unit) {
+fun GoogleMapScreen(navController: NavController) {
     val context = LocalContext.current
     var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
     var diameter by remember { mutableDoubleStateOf(200.0) }
@@ -62,16 +62,21 @@ fun GoogleMapScreen(onLocationSelected: (LatLng, Double) -> Unit) {
         )
     }
     var showDiameterSelectDialog by remember { mutableStateOf(false) }
+    var showInputNameDialog by remember { mutableStateOf(false) }
     LaunchedEffect(cameraPositionState.position) {
         zoomLevel = cameraPositionState.position.zoom.toDouble()
     }
+    var nameFromSearch by remember { mutableStateOf<String?>(null) }
 
     // Map UI
     Box(modifier = Modifier.fillMaxSize()) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            onMapClick = { latLng -> selectedLocation = latLng }
+            onMapClick = { latLng ->
+                nameFromSearch = null
+                selectedLocation = latLng
+            }
         ) {
             selectedLocation?.let {
                 Marker(state = MarkerState(position = it))
@@ -126,7 +131,8 @@ fun GoogleMapScreen(onLocationSelected: (LatLng, Double) -> Unit) {
             .fillMaxSize()
             .background(Color.Transparent)
     ) {
-        GoogleMapSearchBar(modifier = Modifier.padding(top = 48.dp)) { latLng ->
+        GoogleMapSearchBar(modifier = Modifier.padding(top = 48.dp)) { locationName, latLng ->
+            nameFromSearch = locationName
             LatLng(latLng.latitude, latLng.longitude).let { location ->
                 selectedLocation = location
                 cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(location, zoomLevel.toFloat()))
@@ -136,9 +142,8 @@ fun GoogleMapScreen(onLocationSelected: (LatLng, Double) -> Unit) {
         // Radius and confirmation section
         Button(
             onClick = {
-                val radius = diameter / 2
                 selectedLocation?.let {
-                    onLocationSelected(it, radius)
+                    showInputNameDialog = true
                 }
             },
             enabled = selectedLocation != null && diameter > 0,
@@ -163,6 +168,29 @@ fun GoogleMapScreen(onLocationSelected: (LatLng, Double) -> Unit) {
             }
         }
     }
+
+    if (showInputNameDialog) {
+        LocationInputDialog(
+            nameFromSearch = nameFromSearch,
+            latLng = selectedLocation,
+            onDismiss = {
+                showInputNameDialog = false
+            },
+            onLocationSelected = { locationName ->
+                val radius = diameter / 2
+                selectedLocation?.let { onLocationSelected(navController, locationName, it, radius) }
+            }
+        )
+    }
+}
+
+private fun onLocationSelected(navController: NavController, locationName: String, latLng: LatLng, radius: Double) {
+    navController.previousBackStackEntry?.savedStateHandle?.run {
+        set("location_name", locationName)
+        set("latLng", latLng)
+        set("radius", radius)
+    }
+    navController.popBackStack()
 }
 
 private fun getCurrentLocation(context: Context, action: (LatLng) -> Unit) {
