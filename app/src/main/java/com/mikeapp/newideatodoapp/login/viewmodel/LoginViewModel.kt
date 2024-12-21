@@ -84,6 +84,7 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
                 isRememberMe = rememberMe
             )
         } ?: LoginUiState(
+            isAutoLoggingIn = false,
             userName = "",
             passwordPlaceholder = "",
             isRememberMe = true
@@ -99,7 +100,7 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
                     repository.authenticateUserHash(localUser.userName, localUser.passwordHash)
                 if (user == null) {
                     Log.w(logTag, "auto log in failed, get null user name from repository call.")
-                    _uiState.value = _uiState.value.copy(isLoading = false)
+                    _uiState.value = _uiState.value.copy(isAutoLoggingIn = false, isLoading = false)
                 } else {
                     // log in success
                     _uiState.value = _uiState.value.copy(isLoading = false)

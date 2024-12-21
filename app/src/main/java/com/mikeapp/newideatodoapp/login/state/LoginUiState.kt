@@ -1,6 +1,7 @@
 package com.mikeapp.newideatodoapp.login.state
 
 data class LoginUiState(
+    val isAutoLoggingIn: Boolean = true,
     val isLoading: Boolean = false,
     val userName: String = "",
     val passwordPlaceholder: String = "",

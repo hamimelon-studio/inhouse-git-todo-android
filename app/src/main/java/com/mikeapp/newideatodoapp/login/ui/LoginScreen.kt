@@ -55,149 +55,153 @@ fun LoginScreen(navController: NavController, innerPadding: PaddingValues) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .padding(horizontal = 36.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Login",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-
-        // Username TextField
-        Column(modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = username,
-                onValueChange = {
-                    viewModel.dismissUserNameError()
-                    username = it
-                },
-                label = { Text("Username") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
-                isError = usernameError != null
-            )
-            usernameError?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, bottom = 8.dp)
-                )
-            }
-        }
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = password,
-                onValueChange = {
-                    viewModel.dismissPasswordError()
-                    password = it
-                },
-                label = { Text("Password") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
-                isError = passwordError != null
-            )
-            passwordError?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, bottom = 8.dp)
-                )
-            }
-        }
-
-        // Remember Me Checkbox
-        Row(
+    if (uiState.isAutoLoggingIn) {
+        AutoLoginScreen()
+    } else {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 36.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Checkbox(
-                checked = rememberMe,
-                onCheckedChange = { rememberMe = it }
-            )
             Text(
-                text = "Remember Me",
-                modifier = Modifier.padding(start = 8.dp)
+                text = "Login",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 32.dp)
             )
-        }
 
-        // Login Button with Loading State
-        if (uiState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-            )
-        } else {
-            Button(
-                onClick = {
-                    viewModel.login(username, password, rememberMe) {
-                        navController.navigate("todo") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    }
-                },
+            // Username TextField
+            Column(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = {
+                        viewModel.dismissUserNameError()
+                        username = it
+                    },
+                    label = { Text("Username") },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp),
+                    isError = usernameError != null
+                )
+                usernameError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, bottom = 8.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = {
+                        viewModel.dismissPasswordError()
+                        password = it
+                    },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp),
+                    isError = passwordError != null
+                )
+                passwordError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, bottom = 8.dp)
+                    )
+                }
+            }
+
+            // Remember Me Checkbox
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Login")
+                Checkbox(
+                    checked = rememberMe,
+                    onCheckedChange = { rememberMe = it }
+                )
+                Text(
+                    text = "Remember Me",
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
-        }
 
-        // Create New Account Link
-        TextButton(
-            onClick = {
-                navController.navigate("register")
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Create New Account")
-        }
+            // Login Button with Loading State
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                )
+            } else {
+                Button(
+                    onClick = {
+                        viewModel.login(username, password, rememberMe) {
+                            navController.navigate("todo") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    Text("Login")
+                }
+            }
 
-        // OR Separator
-        Text(
-            text = "OR",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
+            // Create New Account Link
+            TextButton(
+                onClick = {
+                    navController.navigate("register")
+                },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text("Create New Account")
+            }
 
-        // RTM API Key Option
-        Text(
-            text = "I am a Remember The Milk user, I want to use RTM api key",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+            // OR Separator
+            Text(
+                text = "OR",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
-        // RTM API Key Link
-        TextButton(
-            onClick = {
-                navController.navigate("rtm_landing")
-            },
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
-            Text("Set it up")
+            // RTM API Key Option
+            Text(
+                text = "I am a Remember The Milk user, I want to use RTM api key",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // RTM API Key Link
+            TextButton(
+                onClick = {
+                    navController.navigate("rtm_landing")
+                },
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Text("Set it up")
+            }
         }
     }
 }
