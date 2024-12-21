@@ -1,9 +1,11 @@
 package com.mikeapp.newideatodoapp.main.add.model
 
+import com.mikeapp.newideatodoapp.data.enums.TaskPriority
+
 data class AddTaskUiState(
     val isLoading: Boolean = false,
     val taskName: String = "",
-    val priority: String = "",
-    val location: String = "",
-    val date: String = ""
+    val priority: TaskPriority? = null,
+    val location: LocationUi? = null,
+    val date: String? = null
 )

@@ -41,17 +41,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.wear.compose.material.Chip
-import androidx.wear.compose.material.ChipDefaults
 import com.google.android.gms.maps.model.LatLng
 import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.enums.TaskPriority
+import com.mikeapp.newideatodoapp.main.add.component.AddTaskBottomIconRow
 import com.mikeapp.newideatodoapp.main.add.component.AddTaskTopBar
+import com.mikeapp.newideatodoapp.main.add.component.AttributeList
 import com.mikeapp.newideatodoapp.main.add.component.CustomDatePickerDialog
 import com.mikeapp.newideatodoapp.main.add.component.CustomTimePickerDialog
 import com.mikeapp.newideatodoapp.main.add.component.LocationList
 import com.mikeapp.newideatodoapp.main.add.component.PriorityList
 import com.mikeapp.newideatodoapp.main.add.model.LocationUi
+import com.mikeapp.newideatodoapp.main.add.model.TaskFieldType
 import com.mikeapp.newideatodoapp.main.add.viewmodel.AddTaskViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
@@ -134,9 +135,8 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+                    .heightIn(min = 36.dp)
                     .weight(1f, fill = false)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 TextField(
                     value = newTaskTitleState,
@@ -148,7 +148,7 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(8.dp)
                         .weight(1f)
                         .focusRequester(focusRequester),
                     maxLines = 5,
@@ -165,17 +165,11 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
 
             HorizontalDivider(
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.outlineVariant,
                 thickness = 1.dp
             )
 
-            Chip(
-                onClick = { },
-                colors = ChipDefaults.chipColors(),
-                border = ChipDefaults.chipBorder(),
-                modifier = Modifier.padding(8.dp),
-                content = { Text("Location: Home", style = MaterialTheme.typography.bodyMedium) }
-            )
+            AttributeList()
 
             if (showPrioritySelection) {
                 PriorityList(Modifier.align(Alignment.Start)) {
@@ -197,6 +191,15 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
                 animationSpec = tween(durationMillis = 300), label = ""
             )
 
+            AddTaskBottomIconRow(bottomPadding, Modifier.align(Alignment.End)) { fieldType ->
+                when(fieldType) {
+                    TaskFieldType.Date -> showDatePicker = true
+                    TaskFieldType.Time -> showTimePicker = true
+                    TaskFieldType.Priority -> showPrioritySelection = !showPrioritySelection
+                    TaskFieldType.Location -> showLocationSelection = !showLocationSelection
+                    TaskFieldType.List -> {}
+                }
+            }
         }
     }
 

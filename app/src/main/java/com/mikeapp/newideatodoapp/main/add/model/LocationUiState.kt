@@ -5,6 +5,7 @@ data class LocationUiState(
 )
 
 data class LocationUi(
+    var id: Int? = null,
     val name: String,
     val lat: Double,
     val lon: Double,
