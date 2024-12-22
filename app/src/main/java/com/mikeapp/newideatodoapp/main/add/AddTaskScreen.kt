@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Applier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +44,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.android.gms.maps.model.LatLng
 import com.mikeapp.newideatodoapp.data.enums.TaskPriority
 import com.mikeapp.newideatodoapp.data.enums.getPriorityByValue
+import com.mikeapp.newideatodoapp.data.exception.AppException
 import com.mikeapp.newideatodoapp.main.add.component.AddTaskBottomIconRow
 import com.mikeapp.newideatodoapp.main.add.component.AddTaskTopBar
 import com.mikeapp.newideatodoapp.main.add.component.AttributeList
@@ -92,15 +94,19 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
     val locationResultRadius = navBackStackEntry?.savedStateHandle?.get<Double>("radius")
 
     // Recovery Section
-    if (locationResultName != null && locationResultLatLng != null && locationResultRadius != null) {
-        viewModel.addLocation(
-            LocationUi(
-                name = locationResultName,
-                lat = locationResultLatLng.latitude,
-                lon = locationResultLatLng.longitude,
-                radius = locationResultRadius
+    LaunchedEffect(locationResultName, locationResultLatLng, locationResultRadius) {
+        if (locationResultName != null && locationResultLatLng != null && locationResultRadius != null) {
+            val locationUi = viewModel.addLocation(
+                LocationUi(
+                    name = locationResultName,
+                    lat = locationResultLatLng.latitude,
+                    lon = locationResultLatLng.longitude,
+                    radius = locationResultRadius
+                )
             )
-        )
+            location = locationUi
+            locationId = locationUi.id ?: -1
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -130,7 +136,12 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
 
     LaunchedEffect(locationId, location) {
         if (locationId >= 0 && location == null) {
-            location = viewModel.getLocationById(locationId)
+            try {
+                location = viewModel.getLocationById(locationId)
+            } catch (e: AppException) {
+                locationId = -1
+                location = null
+            }
         }
     }
 
@@ -162,7 +173,7 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
                     locationNotification = isLocationNotificationOn,
                     dateTimeNotification = isDateTimeNotificationOn
                 ) {
-                    navController.navigate("todo")
+                    navController.popBackStack()
                 }
             }
         },
@@ -237,12 +248,23 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
             }
 
             if (showLocationSelection) {
-                LocationList(navController, Modifier.align(Alignment.Start)) {
-                    location = it
-                    locationId = it.id ?: -1
-                    showLocationSelection = false
-                    isShowAttribute = true
-                }
+                LocationList(
+                    navController = navController,
+                    modifier = Modifier.align(Alignment.Start),
+                    onSelected = {
+                        location = it
+                        locationId = it.id ?: -1
+                        showLocationSelection = false
+                        isShowAttribute = true
+                    },
+                    onDelete = {
+                        viewModel.deleteLocation(it)
+                        if (locationId == it.id || location?.id == it.id) {
+                            location = null
+                            locationId = -1
+                        }
+                    }
+                )
             }
 
             // Fixed position for icons at the bottom

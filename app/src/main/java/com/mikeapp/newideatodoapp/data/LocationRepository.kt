@@ -41,6 +41,14 @@ class LocationRepository(
         }
     }
 
+    suspend fun deleteLocation(locationId: Int) {
+        locationApi.deleteLocation(eq(locationId))
+        room.locationDao().remove(locationId)
+        val user =
+            room.userDao().getUser().firstOrNull() ?: throw CodeLogicException("user is null in deleteLocation().")
+        updateLocationVersion(user.id, System.currentTimeMillis())
+    }
+
     suspend fun addLocation(locationUi: LocationUi) {
         val user = room.userDao().getUser().firstOrNull() ?: throw CodeLogicException("user is null in addLocation().")
         val locationRequest = SupabaseLocation(
@@ -72,6 +80,11 @@ class LocationRepository(
     suspend fun getLocationById(locationId: Int): LocationEntity {
         return room.locationDao().getLocation(locationId)
             ?: throw CodeLogicException("location is null in getLocationById()")
+    }
+
+    suspend fun getLastLocationFromDb(): LocationEntity {
+        return room.locationDao().getLastLocation()
+            ?: throw CodeLogicException("last location should not be null after just added a new one.")
     }
 
     private suspend fun updateLocationVersion(userId: Int, locationVersion: Long) {

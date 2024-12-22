@@ -13,7 +13,10 @@ interface LocationDao {
 
     @Query("SELECT * FROM location WHERE id = :id")
     suspend fun getLocation(id: Int): LocationEntity?
-    
+
+    @Query("SELECT * FROM location ORDER BY id DESC LIMIT 1")
+    suspend fun getLastLocation(): LocationEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(locationEntity: LocationEntity)
 

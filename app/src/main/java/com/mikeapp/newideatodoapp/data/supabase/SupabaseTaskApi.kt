@@ -38,6 +38,6 @@ interface SupabaseTaskApi {
 
     @DELETE("/rest/v1/task")
     suspend fun deleteTask(
-        @Query("id") taskId: Int
+        @Query("id") taskId: String
     ): Response<Unit>
 }

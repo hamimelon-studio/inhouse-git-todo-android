@@ -82,10 +82,27 @@ class AddTaskViewModel(
         }
     }
 
-    fun addLocation(locationUi: LocationUi) {
-        viewModelScope.launch {
+    suspend fun addLocation(locationUi: LocationUi): LocationUi {
+        return withContext(Dispatchers.IO) {
             locationRepository.addLocation(locationUi)
             loadLocationList()
+            val locationEntity = locationRepository.getLastLocationFromDb()
+            return@withContext LocationUi(
+                id = locationEntity.id,
+                name = locationEntity.name,
+                lat = locationEntity.lat,
+                lon = locationEntity.lon,
+                radius = locationEntity.radius
+            )
+        }
+    }
+
+    fun deleteLocation(locationUi: LocationUi) {
+        viewModelScope.launch {
+            locationUi.id?.let {
+                locationRepository.deleteLocation(it)
+                loadLocationList()
+            }
         }
     }
 

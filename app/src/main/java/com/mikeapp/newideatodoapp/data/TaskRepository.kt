@@ -27,7 +27,7 @@ class TaskRepository(
     }
 
     suspend fun deleteTask(task: TaskEntity) {
-        taskApi.deleteTask(task.id)
+        taskApi.deleteTask(eq(task.id))
         room.taskDao().remove(task.id)
         updateTaskVersion(task.list)
     }
@@ -145,7 +145,7 @@ class TaskRepository(
             location = task.location,
             priority = task.priority,
             due = task.due,
-            time = task.due,
+            time = task.time,
             list = task.list,
             locationNotification = task.locationNotification,
             dateTimeNotification = task.dateTimeNotification
