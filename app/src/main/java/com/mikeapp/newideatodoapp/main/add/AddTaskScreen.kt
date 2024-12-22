@@ -4,9 +4,9 @@ import android.graphics.Rect
 import android.util.Log
 import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,12 +38,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.android.gms.maps.model.LatLng
-import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.enums.TaskPriority
+import com.mikeapp.newideatodoapp.data.enums.getPriorityByValue
 import com.mikeapp.newideatodoapp.main.add.component.AddTaskBottomIconRow
 import com.mikeapp.newideatodoapp.main.add.component.AddTaskTopBar
 import com.mikeapp.newideatodoapp.main.add.component.AttributeList
@@ -54,13 +53,14 @@ import com.mikeapp.newideatodoapp.main.add.component.PriorityList
 import com.mikeapp.newideatodoapp.main.add.model.LocationUi
 import com.mikeapp.newideatodoapp.main.add.model.TaskFieldType
 import com.mikeapp.newideatodoapp.main.add.viewmodel.AddTaskViewModel
+import com.mikeapp.newideatodoapp.util.RoomUtil.supportNullable
 import org.koin.androidx.compose.koinViewModel
-import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Composable
 fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, taskId: Int? = null) {
     val viewModel: AddTaskViewModel = koinViewModel()
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     var newTaskTitleText by rememberSaveable { mutableStateOf("") }
     var selectionStart by rememberSaveable { mutableIntStateOf(0) }
     var selectionEnd by rememberSaveable { mutableIntStateOf(0) }
@@ -75,24 +75,66 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
     val focusRequester = remember { FocusRequester() }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
-    var selectedDateTime by rememberSaveable { mutableStateOf<LocalDateTime?>(null) }
+    var selectedDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
+    var selectedTime by rememberSaveable { mutableStateOf<LocalTime?>(null) }
     var showPrioritySelection by remember { mutableStateOf(false) }
     var priority by rememberSaveable { mutableIntStateOf(TaskPriority.Medium.value) }
     var showLocationSelection by remember { mutableStateOf(false) }
-    var location by rememberSaveable { mutableStateOf<LocationUi?>(null) }
+    var location by remember { mutableStateOf<LocationUi?>(null) }
+    var locationId by rememberSaveable { mutableIntStateOf(-1) }
+    var isShowAttribute by remember { mutableStateOf(true) }
+    var isLocationNotificationOn by rememberSaveable { mutableStateOf(false) }
+    var isDateTimeNotificationOn by rememberSaveable { mutableStateOf(false) }
 
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val locationResultName = navBackStackEntry?.savedStateHandle?.get<String>("location_name")
     val locationResultLatLng = navBackStackEntry?.savedStateHandle?.get<LatLng>("latLng")
     val locationResultRadius = navBackStackEntry?.savedStateHandle?.get<Double>("radius")
 
+    // Recovery Section
     if (locationResultName != null && locationResultLatLng != null && locationResultRadius != null) {
-        Log.d(
-            logTag,
-            "locationResultName: $locationResultName, locationResultLatLng: $locationResultLatLng, locationResultRadius: $locationResultRadius"
+        viewModel.addLocation(
+            LocationUi(
+                name = locationResultName,
+                lat = locationResultLatLng.latitude,
+                lon = locationResultLatLng.longitude,
+                radius = locationResultRadius
+            )
         )
     }
 
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    LaunchedEffect(taskId) {
+        if (taskId != null) {
+            val taskEntity = viewModel.getTask(taskId)
+            newTaskTitleText = taskEntity.name
+            selectionStart = taskEntity.name.length
+            selectionEnd = taskEntity.name.length
+            newTaskTitleState =
+                TextFieldValue(text = newTaskTitleText, selection = TextRange(selectionStart, selectionEnd))
+            priority = taskEntity.priority
+            locationId = taskEntity.location ?: -1
+            if (taskEntity.due?.supportNullable() != null) {
+                selectedDate = LocalDate.parse(taskEntity.due)
+            }
+            if (taskEntity.time?.supportNullable() != null) {
+                selectedTime = LocalTime.parse(taskEntity.time)
+            }
+            isLocationNotificationOn = taskEntity.locationNotification
+            isDateTimeNotificationOn = taskEntity.dateTimeNotification
+        }
+    }
+
+    LaunchedEffect(locationId, location) {
+        if (locationId >= 0 && location == null) {
+            location = viewModel.getLocationById(locationId)
+        }
+    }
+
+    // Main Part Start
     DisposableEffect(context) {
         val listener = ViewTreeObserver.OnPreDrawListener {
             val rect = Rect()
@@ -107,24 +149,22 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.load(taskId)
-        focusRequester.requestFocus()
-    }
-
-    LaunchedEffect(uiState.taskName) {
-        if (uiState.taskName.isNotEmpty() || newTaskTitleText.isEmpty()) {
-            newTaskTitleText = uiState.taskName
-            selectionStart = uiState.taskName.length
-            selectionEnd = uiState.taskName.length
-            newTaskTitleState =
-                TextFieldValue(text = newTaskTitleText, selection = TextRange(selectionStart, selectionEnd))
-        }
-    }
-
     Scaffold(
         topBar = {
-            AddTaskTopBar(navController, newTaskTitleState, taskId)
+            AddTaskTopBar(navController) {
+                viewModel.saveTask(
+                    taskName = newTaskTitleState.text,
+                    taskId = taskId,
+                    priority = getPriorityByValue(priority),
+                    location = location,
+                    date = selectedDate,
+                    time = selectedTime,
+                    locationNotification = isLocationNotificationOn,
+                    dateTimeNotification = isDateTimeNotificationOn
+                ) {
+                    navController.navigate("todo")
+                }
+            }
         },
     ) { innerPadding ->
         Column(
@@ -169,19 +209,39 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
                 thickness = 1.dp
             )
 
-            AttributeList()
+            if (isShowAttribute) {
+                AttributeList(
+                    priority = priority,
+                    location = location,
+                    dateTime = selectedTime?.let { time ->
+                        selectedDate?.atTime(time)
+                    } ?: selectedDate?.atStartOfDay(),
+                    isLocationNotificationOn = isLocationNotificationOn,
+                    isDateTimeNotificationOn = isDateTimeNotificationOn,
+                    modifier = Modifier.align(Alignment.Start),
+                    onLocationClicked = {
+                        isLocationNotificationOn = !isLocationNotificationOn
+                    },
+                    onDateTimeClicked = {
+                        isDateTimeNotificationOn = !isDateTimeNotificationOn
+                    }
+                )
+            }
 
             if (showPrioritySelection) {
                 PriorityList(Modifier.align(Alignment.Start)) {
                     priority = it
                     showPrioritySelection = false
+                    isShowAttribute = true
                 }
             }
 
             if (showLocationSelection) {
                 LocationList(navController, Modifier.align(Alignment.Start)) {
                     location = it
+                    locationId = it.id ?: -1
                     showLocationSelection = false
+                    isShowAttribute = true
                 }
             }
 
@@ -192,11 +252,25 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
             )
 
             AddTaskBottomIconRow(bottomPadding, Modifier.align(Alignment.End)) { fieldType ->
-                when(fieldType) {
+                when (fieldType) {
                     TaskFieldType.Date -> showDatePicker = true
                     TaskFieldType.Time -> showTimePicker = true
-                    TaskFieldType.Priority -> showPrioritySelection = !showPrioritySelection
-                    TaskFieldType.Location -> showLocationSelection = !showLocationSelection
+                    TaskFieldType.Priority -> {
+                        showPrioritySelection = !showPrioritySelection
+                        isShowAttribute = !showPrioritySelection
+                        if (showPrioritySelection) {
+                            showLocationSelection = false
+                        }
+                    }
+
+                    TaskFieldType.Location -> {
+                        showLocationSelection = !showLocationSelection
+                        isShowAttribute = !showLocationSelection
+                        if (showLocationSelection) {
+                            showPrioritySelection = false
+                        }
+                    }
+
                     TaskFieldType.List -> {}
                 }
             }
@@ -207,15 +281,8 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
     if (showDatePicker) {
         CustomDatePickerDialog(
             onDismiss = { showDatePicker = false },
-            onDateSelected = { selectedDate ->
-                // Update or create LocalDateTime
-                selectedDateTime = if (selectedDateTime != null) {
-                    selectedDateTime!!.withYear(selectedDate.year)
-                        .withMonth(selectedDate.monthValue)
-                        .withDayOfMonth(selectedDate.dayOfMonth)
-                } else {
-                    selectedDate.atStartOfDay()
-                }
+            onDateSelected = {
+                selectedDate = it
             }
         )
     }
@@ -224,17 +291,28 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
     if (showTimePicker) {
         CustomTimePickerDialog(
             onDismiss = { showTimePicker = false },
-            onTimeSelected = { selectedTime ->
-                // Update or create LocalDateTime with selected time
-                selectedDateTime = if (selectedDateTime != null) {
-                    selectedDateTime!!.withHour(selectedTime.hour)
-                        .withMinute(selectedTime.minute)
-                } else {
-                    LocalDateTime.now()
-                        .withHour(selectedTime.hour)
-                        .withMinute(selectedTime.minute)
-                }
+            onTimeSelected = {
+                selectedTime = it
+                selectedDate = LocalDate.now()
             }
         )
     }
+
+    BackHandler(onBack = {
+        when {
+            showPrioritySelection -> {
+                showPrioritySelection = false
+                isShowAttribute = true
+            }
+
+            showLocationSelection -> {
+                showLocationSelection = false
+                isShowAttribute = true
+            }
+
+            else -> {
+                navController.popBackStack()
+            }
+        }
+    })
 }

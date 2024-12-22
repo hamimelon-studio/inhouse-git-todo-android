@@ -26,9 +26,8 @@ import com.mikeapp.newideatodoapp.main.add.model.taskFields
 @Composable
 fun AddTaskBottomIconRow(bottomPadding: Dp, modifier: Modifier, onAction: (TaskFieldType) -> Unit) {
     val iconModifier = Modifier
-        .background(MaterialTheme.colorScheme.secondaryContainer, shape = CircleShape)
+        .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
         .padding(16.dp)
-    val iconTint = MaterialTheme.colorScheme.onSecondaryContainer
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -42,7 +41,6 @@ fun AddTaskBottomIconRow(bottomPadding: Dp, modifier: Modifier, onAction: (TaskF
             Icon(
                 imageVector = ImageVector.vectorResource(id = field.iconRes),
                 contentDescription = field.label,
-                tint = iconTint,
                 modifier = iconModifier.clickable { onAction(field.type) }
             )
         }

@@ -104,8 +104,7 @@ fun GoogleMapScreen(navController: NavController) {
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_radar_24),
-                    contentDescription = "Select Diameter",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    contentDescription = "Select Diameter"
                 )
             }
             FloatingActionButton(
@@ -119,8 +118,7 @@ fun GoogleMapScreen(navController: NavController) {
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_my_location_24),
-                    contentDescription = "Current Location",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    contentDescription = "Current Location"
                 )
             }
         }

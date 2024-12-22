@@ -36,4 +36,9 @@ interface SupabaseUserApi {
     suspend fun getUserByName(
         @Query("userName") userName: String,
     ): List<SupabaseUser>
+
+    @GET("/rest/v1/user")
+    suspend fun getUserById(
+        @Query("id") id: String,
+    ): List<SupabaseUser>
 }

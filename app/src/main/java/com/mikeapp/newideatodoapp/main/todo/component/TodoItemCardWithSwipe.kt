@@ -5,12 +5,15 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -37,13 +40,19 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import com.mikeapp.newideatodoapp.R
+import com.mikeapp.newideatodoapp.data.enums.TaskPriority
+import com.mikeapp.newideatodoapp.data.enums.getPriorityByValue
 import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
+import com.mikeapp.newideatodoapp.ui.theme.HighPriorityColor
+import com.mikeapp.newideatodoapp.ui.theme.LowPriorityColor
+import com.mikeapp.newideatodoapp.ui.theme.MediumPriorityColor
 
 @OptIn(ExperimentalWearMaterialApi::class)
 @Composable
 fun TodoItemCardWithSwipe(
     navController: NavController,
     todo: TaskEntity,
+    onComplete: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     val swipeableState = rememberSwipeableState(initialValue = 0)
@@ -59,7 +68,7 @@ fun TodoItemCardWithSwipe(
             .swipeable(
                 state = swipeableState,
                 anchors = anchors,
-                thresholds = { _, _ -> FractionalThreshold(0.5f) },
+                thresholds = { _, _ -> FractionalThreshold(0.25f) },
                 orientation = Orientation.Horizontal
             ),
         contentAlignment = Alignment.Center
@@ -74,7 +83,7 @@ fun TodoItemCardWithSwipe(
         if (swipeableState.currentValue == 1) {
             onDismiss()
         } else if (swipeableState.currentValue == 2) {
-            onDismiss()
+            onComplete(todo.id)
         }
 
         // Tick icon animation when swiping right
@@ -117,8 +126,7 @@ fun TodoItemCardWithSwipe(
             modifier = Modifier
                 .offset { IntOffset(swipeOffset.toInt(), 0) }
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .background(MaterialTheme.colorScheme.surface),
             shape = RectangleShape,
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
@@ -128,13 +136,26 @@ fun TodoItemCardWithSwipe(
             }
         ) {
             Row(
-                modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .width(8.dp)
+                        .heightIn(min = 64.dp)
+                        .background(
+                            color = when (getPriorityByValue(todo.priority)) {
+                                TaskPriority.High -> HighPriorityColor
+                                TaskPriority.Medium -> MediumPriorityColor
+                                TaskPriority.Low -> LowPriorityColor
+                            }
+                        )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = todo.name,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(start = 4.dp, end = 8.dp)
                     )
                 }
             }

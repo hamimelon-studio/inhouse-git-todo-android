@@ -44,13 +44,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onDestroy() {
-        runBlocking {
-            taskRepository.clearDraft()
-        }
-        super.onDestroy()
-    }
-
     override fun onResume() {
         super.onResume()
         val intent = Intent(this@MainActivity, MapActivity::class.java)

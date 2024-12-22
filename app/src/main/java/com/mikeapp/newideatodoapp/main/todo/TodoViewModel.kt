@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikeapp.newideatodoapp.data.TaskRepository
 import com.mikeapp.newideatodoapp.data.exception.AppException
+import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +52,17 @@ class TodoViewModel(private val repository: TaskRepository) : ViewModel() {
                 delay(400)
                 _uiState.value = _uiState.value.copy(isLoading = false)
             }
+        }
+    }
+
+    fun completeTask(id: Int) {
+
+    }
+
+    fun deleteTask(task: TaskEntity) {
+        viewModelScope.launch {
+            repository.deleteTask(task)
+            load()
         }
     }
 }

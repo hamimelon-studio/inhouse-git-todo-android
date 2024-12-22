@@ -16,10 +16,13 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mikeapp.newideatodoapp.R
-import com.mikeapp.newideatodoapp.main.add.model.LocationUi
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun LocationField(location: LocationUi, isNotificationOn: Boolean, onSelected: () -> Unit) {
+fun DateTimeField(dateTime: LocalDateTime, isNotificationOn: Boolean, onSelected: () -> Unit) {
+    val formattedDateTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm a"))
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -31,11 +34,11 @@ fun LocationField(location: LocationUi, isNotificationOn: Boolean, onSelected: (
             .padding(horizontal = 16.dp)
     ) {
         Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_location_pin_24),
+            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_calendar_today_24),
             contentDescription = null
         )
         Text(
-            text = location.name,
+            text = formattedDateTime,
             modifier = Modifier
                 .padding(start = 8.dp)
                 .weight(1f),

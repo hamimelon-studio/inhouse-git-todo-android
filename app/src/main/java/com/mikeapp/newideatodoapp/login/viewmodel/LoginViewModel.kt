@@ -96,16 +96,16 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch {
             if (localUser != null && localUser.rememberMe) {
                 _uiState.value = _uiState.value.copy(isLoading = true)
-                val user =
-                    repository.authenticateUserHash(localUser.userName, localUser.passwordHash)
-                if (user == null) {
-                    Log.w(logTag, "auto log in failed, get null user name from repository call.")
-                    _uiState.value = _uiState.value.copy(isAutoLoggingIn = false, isLoading = false)
-                } else {
+                try {
+                    val user =
+                        repository.authenticateUserAutoLogin(localUser.userName, localUser.passwordHash)
                     // log in success
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     Log.d("bbbb", "user: $user")
                     action.invoke()
+                } catch (e: AppException) {
+                    Log.w(logTag, "auto log in failed, get null user name from repository call. exception: $e")
+                    _uiState.value = _uiState.value.copy(isAutoLoggingIn = false, isLoading = false)
                 }
             }
         }

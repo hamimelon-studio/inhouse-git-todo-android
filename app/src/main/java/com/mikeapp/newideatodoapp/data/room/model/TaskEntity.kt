@@ -2,6 +2,8 @@ package com.mikeapp.newideatodoapp.data.room.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Entity(tableName = "task")
 data class TaskEntity(
@@ -13,5 +15,7 @@ data class TaskEntity(
     val priority: Int,
     val due: String?,
     val time: String?,
-    val list: Int
+    val list: Int,
+    val locationNotification: Boolean,
+    val dateTimeNotification: Boolean,
 )

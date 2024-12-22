@@ -1,6 +1,6 @@
 package com.mikeapp.newideatodoapp.main.todo
 
-import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -32,7 +32,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.R
 import com.mikeapp.newideatodoapp.main.todo.component.DrawerMenu
 import com.mikeapp.newideatodoapp.main.todo.component.TodoItemCardWithSwipe
@@ -108,16 +107,33 @@ fun TodoScreen(navController: NavController, paddingValues: PaddingValues) {
                 LazyColumn(
                     modifier = Modifier
                         .padding(innerPadding)
-                        .padding(top = 8.dp)
                         .fillMaxSize()
                 ) {
-                    items(uiState.tasks) { todo ->
-                        TodoItemCardWithSwipe(navController, todo) {
-                            Log.d(logTag, "TodoItemCardWithSwipe: dismiss")
-                        }
+                    items(uiState.tasks, key = { it.id }) { todo ->
+                        TodoItemCardWithSwipe(
+                            navController = navController,
+                            todo = todo,
+                            onComplete = {
+                                viewModel.deleteTask(todo)
+                            },
+                            onDismiss = {})
                     }
                 }
             }
         }
     }
+
+    BackHandler(onBack = {
+        when {
+            drawerState.isClosed -> {
+                scope.launch {
+                    drawerState.open()
+                }
+            }
+
+            else -> {
+                navController.popBackStack()
+            }
+        }
+    })
 }

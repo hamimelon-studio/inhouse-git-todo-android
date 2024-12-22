@@ -7,6 +7,7 @@ kotlinBom = "1.9.0"
 kotlinGradlePlugin = "1.7.0"
 jetbrainsKotlinJvm = "1.9.0"
 
+kotlinxCoroutinesCore = "1.8.1"
 mapsComposeVersion = "4.4.1"
 places = "4.1.0"
 playServicesMaps = "19.0.0"
@@ -41,6 +42,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlinBom" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsComposeVersion" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "mapsComposeVersion" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "mapsComposeVersion" }

@@ -8,5 +8,7 @@ data class SupabaseTask(
     val priority: Int,
     val due: String?,
     val time: String?,
-    val list: Int
+    val list: Int,
+    val locationNotification: Boolean,
+    val dateTimeNotification: Boolean,
 )

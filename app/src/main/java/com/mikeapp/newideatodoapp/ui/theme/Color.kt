@@ -12,9 +12,9 @@ val UltraLightGray = Color(0xFFF2F2F2)
 val LightGray = Color(0xFFF5F5F5)
 
 // Overdue
-val sunsetOrange = Color(0xFFFF5A5F)
+val SunsetOrange = Color(0xFFFF5A5F)
 
 // Priority
-val highPriorityColor = sunsetOrange
-val mediumPriorityColor = BabyBlue
-val lowPriorityColor = LightGray
+val HighPriorityColor = SunsetOrange
+val MediumPriorityColor = BabyBlue
+val LowPriorityColor = LightGray

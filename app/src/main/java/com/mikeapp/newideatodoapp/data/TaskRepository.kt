@@ -3,9 +3,7 @@ package com.mikeapp.newideatodoapp.data
 import com.mikeapp.newideatodoapp.data.exception.BackendAppException
 import com.mikeapp.newideatodoapp.data.exception.CodeLogicException
 import com.mikeapp.newideatodoapp.data.room.TnnDatabase
-import com.mikeapp.newideatodoapp.data.room.dao.TaskDraftDao
 import com.mikeapp.newideatodoapp.data.room.model.ListEntity
-import com.mikeapp.newideatodoapp.data.room.model.TaskDraftEntity
 import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
 import com.mikeapp.newideatodoapp.data.room.model.UserEntity
 import com.mikeapp.newideatodoapp.data.supabase.SupabaseNetworkModule
@@ -16,57 +14,29 @@ class TaskRepository(
     private val room: TnnDatabase,
     networkModule: SupabaseNetworkModule
 ) {
+    private val userApi = networkModule.supabaseUserApi
     private val listApi = networkModule.supabaseListApi
     private val taskApi = networkModule.supabaseTaskApi
 
-    suspend fun saveDraft(taskDraftEntity: TaskDraftEntity) {
-        room.taskDraftDao().saveDraft(taskDraftEntity)
+    suspend fun addTask(taskEntity: TaskEntity) {
+        addTaskToCloud(taskEntity)
+        val task = fetchTaskFromCloud(taskEntity.name, taskEntity.list)
+        val taskEntityWithId = getTaskEntity(task)
+        saveTaskToLocalRoomDb(taskEntityWithId)
+        updateTaskVersion(taskEntity.list)
     }
 
-    suspend fun getDraft(): TaskDraftEntity? {
-        return room.taskDraftDao().getDraft()
+    suspend fun deleteTask(task: TaskEntity) {
+        taskApi.deleteTask(task.id)
+        room.taskDao().remove(task.id)
+        updateTaskVersion(task.list)
     }
 
-    suspend fun clearDraft() {
-        room.taskDraftDao().clear()
-    }
-
-    suspend fun addTask(taskName: String, listId: Int? = null) {
-        val localList = if (listId != null) {
-            getLocalList(listId)
-        } else {
-            getDefaultList()
-        }
-
-        addTaskToCloud(taskName, localList.id)
-        val task = fetchTaskFromCloud(taskName, localList.id)
-        val taskEntity = getTaskEntity(task)
-        saveTaskToLocalRoomDb(taskEntity)
-        updateTaskVersion(localList.id)
-    }
-
-    suspend fun updateTask(taskId: Int, taskName: String) {
-        val taskEntity = getTaskFromRoomDb(taskId)
-        val taskEntityNew = taskEntity.copy(
-            name = taskName
-        )
-        room.taskDao().save(taskEntityNew)
-        val task = mapToTask(taskEntityNew)
+    suspend fun updateTask(taskEntity: TaskEntity) {
+        room.taskDao().save(taskEntity)
+        val task = mapToTask(taskEntity)
         taskApi.updateTask(task)
-        updateTaskVersion(taskEntityNew.list)
-    }
-
-    private fun mapToTask(taskEntity: TaskEntity): SupabaseTask {
-        return SupabaseTask(
-            id = taskEntity.id,
-            name = taskEntity.name,
-            completed = taskEntity.completed,
-            location = taskEntity.location,
-            priority = taskEntity.priority,
-            due = taskEntity.due,
-            time = taskEntity.time,
-            list = taskEntity.list
-        )
+        updateTaskVersion(taskEntity.list)
     }
 
     suspend fun getUser(): UserEntity {
@@ -111,6 +81,25 @@ class TaskRepository(
         return getTaskFromRoomDb(taskId)
     }
 
+    suspend fun getDefaultList(): ListEntity {
+        return room.listDao().getListByName("Default") ?: throw CodeLogicException("localList is null")
+    }
+
+    private fun mapToTask(taskEntity: TaskEntity): SupabaseTask {
+        return SupabaseTask(
+            id = taskEntity.id,
+            name = taskEntity.name,
+            completed = taskEntity.completed,
+            location = taskEntity.location,
+            priority = taskEntity.priority,
+            due = taskEntity.due,
+            time = taskEntity.time,
+            list = taskEntity.list,
+            locationNotification = taskEntity.locationNotification,
+            dateTimeNotification = taskEntity.dateTimeNotification
+        )
+    }
+
     private suspend fun getTaskFromRoomDb(taskId: Int): TaskEntity {
         return room.taskDao().getTask(taskId) ?: throw CodeLogicException("task $taskId is null")
     }
@@ -132,6 +121,15 @@ class TaskRepository(
             throw BackendAppException("update task version failed")
         }
         room.listDao().updateTaskVersion(listId, timeStamp)
+
+        // Cascade update
+        updateListVersion(getUserIdFromRoomDb(), timeStamp)
+    }
+
+    private suspend fun updateListVersion(userId: Int, listVersion: Long) {
+        val partialUpdate = mapOf("listVersion" to listVersion)
+        userApi.updateLong(eq(userId), partialUpdate)
+        room.userDao().updateListVersion(userId, listVersion)
     }
 
     private suspend fun saveTaskToLocalRoomDb(taskEntity: TaskEntity) {
@@ -147,8 +145,10 @@ class TaskRepository(
             location = task.location,
             priority = task.priority,
             due = task.due,
-            time = task.time,
-            list = task.list
+            time = task.due,
+            list = task.list,
+            locationNotification = task.locationNotification,
+            dateTimeNotification = task.dateTimeNotification
         )
     }
 
@@ -164,15 +164,17 @@ class TaskRepository(
         return tasks.first()
     }
 
-    private suspend fun addTaskToCloud(taskName: String, listId: Int) {
+    private suspend fun addTaskToCloud(taskEntity: TaskEntity) {
         val task = SupabaseTask(
-            name = taskName,
-            completed = false,
-            location = null,
-            priority = 1,
-            due = null,
-            time = null,
-            list = listId
+            name = taskEntity.name,
+            completed = taskEntity.completed,
+            location = taskEntity.location,
+            priority = taskEntity.priority,
+            due = taskEntity.due,
+            time = taskEntity.time,
+            list = taskEntity.list,
+            locationNotification = taskEntity.locationNotification,
+            dateTimeNotification = taskEntity.dateTimeNotification
         )
         val response = taskApi.insertTask(task)
         if (!response.isSuccessful) {
@@ -182,10 +184,6 @@ class TaskRepository(
 
     private suspend fun getLocalList(listId: Int): ListEntity {
         return room.listDao().getList(listId) ?: throw CodeLogicException("localList is null")
-    }
-
-    private suspend fun getDefaultList(): ListEntity {
-        return room.listDao().getListByName("Default") ?: throw CodeLogicException("localList is null")
     }
 
     private suspend fun getLocalListsFromRoomDb(): List<ListEntity> {

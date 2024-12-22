@@ -12,20 +12,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavController
 import com.mikeapp.newideatodoapp.R
-import com.mikeapp.newideatodoapp.main.add.viewmodel.AddTaskViewModel
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTaskTopBar(navController: NavController, newTaskTitleState: TextFieldValue, taskId: Int?) {
-    val viewModel: AddTaskViewModel = koinViewModel()
+fun AddTaskTopBar(navController: NavController, onSave: () -> Unit) {
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
-                viewModel.clearDraft()
                 navController.popBackStack()
             }) {
                 Icon(
@@ -37,12 +32,7 @@ fun AddTaskTopBar(navController: NavController, newTaskTitleState: TextFieldValu
         },
         title = { Text("Save Task") },
         actions = {
-            IconButton(onClick = {
-                viewModel.saveTask(newTaskTitleState.text, taskId) {
-                    viewModel.clearDraft()
-                    navController.navigate("todo")
-                }
-            }) {
+            IconButton(onClick = onSave) {
                 Icon(
                     Icons.Default.Check,
                     contentDescription = "Save",

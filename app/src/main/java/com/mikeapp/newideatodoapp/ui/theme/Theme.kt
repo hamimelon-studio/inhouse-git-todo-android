@@ -13,10 +13,10 @@ import androidx.compose.ui.platform.LocalContext
 private val LightColorScheme = lightColorScheme(
     primary = BlueGrotto,
     onPrimary = FancyWhite,
-    primaryContainer = BlueGrotto,
-    onPrimaryContainer = FancyWhite,
-    secondary = BlueGrotto,
-    onSecondary = FancyWhite,
+    primaryContainer = BabyBlue,
+    onPrimaryContainer = FancyBlack,
+    secondary = BabyBlue,
+    onSecondary = FancyBlack,
     secondaryContainer = BlueGrotto,
     onSecondaryContainer = FancyWhite,
     tertiary = NavyBlue,
@@ -35,14 +35,14 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BlueGrotto,
+    primary = BabyBlue,
     onPrimary = FancyBlack,
     primaryContainer = BlueGrotto,
-    onPrimaryContainer = FancyBlack,
+    onPrimaryContainer = FancyWhite,
     secondary = BlueGrotto,
     onSecondary = FancyWhite,
-    secondaryContainer = BlueGrotto,
-    onSecondaryContainer = FancyWhite,
+    secondaryContainer = BabyBlue,
+    onSecondaryContainer = FancyBlack,
     tertiary = NavyBlue,
     onTertiary = FancyWhite,
     tertiaryContainer = NavyBlue,

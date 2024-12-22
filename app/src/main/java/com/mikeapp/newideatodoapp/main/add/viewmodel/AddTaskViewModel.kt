@@ -1,50 +1,66 @@
 package com.mikeapp.newideatodoapp.main.add.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.LocationRepository
 import com.mikeapp.newideatodoapp.data.TaskRepository
-import com.mikeapp.newideatodoapp.data.room.model.TaskDraftEntity
-import com.mikeapp.newideatodoapp.main.add.model.AddTaskUiState
+import com.mikeapp.newideatodoapp.data.enums.TaskPriority
+import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
 import com.mikeapp.newideatodoapp.main.add.model.LocationUi
 import com.mikeapp.newideatodoapp.main.add.model.LocationUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.LocalTime
 
 class AddTaskViewModel(
     private val repository: TaskRepository,
     private val locationRepository: LocationRepository
 ) : ViewModel() {
-    private var _uiState = MutableStateFlow(AddTaskUiState())
-
-    val uiState: StateFlow<AddTaskUiState> = _uiState.asStateFlow()
-
     private var _locationUiState = MutableStateFlow(LocationUiState(emptyList()))
 
     val locationUiState: StateFlow<LocationUiState> = _locationUiState.asStateFlow()
 
-    fun load(taskId: Int? = null) {
-        Log.d(logTag, "load: $taskId")
-        taskId?.let {
-            viewModelScope.launch {
-                val task = repository.getTask(taskId)
-                _uiState.value = _uiState.value.copy(
-                    taskName = task.name
-                )
-            }
+    suspend fun getTask(taskId: Int): TaskEntity {
+        return withContext(Dispatchers.IO) {
+            val task = repository.getTask(taskId)
+            return@withContext task
         }
     }
 
-    fun saveTask(taskName: String, taskId: Int? = null, onCompleted: () -> Unit) {
+    fun saveTask(
+        taskName: String,
+        taskId: Int? = null,
+        priority: TaskPriority,
+        location: LocationUi?,
+        date: LocalDate? = null,
+        time: LocalTime? = null,
+        locationNotification: Boolean = false,
+        dateTimeNotification: Boolean = false,
+        onCompleted: () -> Unit
+    ) {
         viewModelScope.launch {
+            val taskEntity = TaskEntity(
+                id = taskId ?: -1,
+                name = taskName,
+                completed = false,
+                location = location?.id,
+                priority = priority.value,
+                due = date?.toString(),
+                time = time?.toString(),
+                list = repository.getDefaultList().id,
+                locationNotification = locationNotification,
+                dateTimeNotification = dateTimeNotification
+            )
+
             if (taskId != null) {
-                repository.updateTask(taskId, taskName)
+                repository.updateTask(taskEntity)
             } else {
-                repository.addTask(taskName)
+                repository.addTask(taskEntity)
             }
             onCompleted.invoke()
         }
@@ -55,6 +71,7 @@ class AddTaskViewModel(
             val locations = locationRepository.getLocationList()
             val locationUiList = locations.map {
                 LocationUi(
+                    id = it.id,
                     name = it.name,
                     lat = it.lat,
                     lon = it.lon,
@@ -65,37 +82,23 @@ class AddTaskViewModel(
         }
     }
 
-    fun saveDraft(taskName: String, taskId: Int?) {
+    fun addLocation(locationUi: LocationUi) {
         viewModelScope.launch {
-            repository.saveDraft(
-                TaskDraftEntity(
-                    taskId = taskId,
-                    name = taskName,
-                    completed = false,
-                    location = null,
-                    priority = 1,
-                    due = null,
-                    time = null,
-                    list = 1
-                )
+            locationRepository.addLocation(locationUi)
+            loadLocationList()
+        }
+    }
+
+    suspend fun getLocationById(locationId: Int): LocationUi {
+        return withContext(Dispatchers.IO) {
+            val locationEntity = locationRepository.getLocationById(locationId)
+            return@withContext LocationUi(
+                id = locationEntity.id,
+                name = locationEntity.name,
+                lat = locationEntity.lat,
+                lon = locationEntity.lon,
+                radius = locationEntity.radius
             )
-        }
-    }
-
-    fun loadDraft() {
-        viewModelScope.launch {
-            val draft = repository.getDraft()
-            if (draft != null) {
-                _uiState.value = _uiState.value.copy(
-                    taskName = draft.name
-                )
-            }
-        }
-    }
-
-    fun clearDraft() {
-        viewModelScope.launch {
-            repository.clearDraft()
         }
     }
 }

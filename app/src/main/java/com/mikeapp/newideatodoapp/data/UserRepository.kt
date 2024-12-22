@@ -55,23 +55,33 @@ class UserRepository(
 
         updateListVersion(user.id, 0L)
         updateDefaultList(user.id, defaultListEntity.id)
+        updateLocationVersion(user.id, 0L)
     }
 
     suspend fun authenticateUser(userName: String, password: String, rememberMe: Boolean) {
         val passwordHash = securityUtil.hashPassword(password)
+        authenticateUserImpl(userName, passwordHash, rememberMe)
+    }
+
+    suspend fun authenticateUserAutoLogin(userName: String, passwordHash: String): UserEntity {
+        return authenticateUserImpl(userName, passwordHash, true)
+    }
+
+    private suspend fun authenticateUserImpl(userName: String, passwordHash: String, rememberMe: Boolean): UserEntity {
         val user = loadUserFromBackendByCredentials(userName, passwordHash)
-        val userEntity = getUserEntity(user, rememberMe)
         val localUserEntity = getLocalUserIdNullable()
-        if (localUserEntity != null && localUserEntity.id == userEntity.id) {
-            updateUser(userEntity)
-            incrementalUpdateLocation(user, userEntity)
-            incrementalUpdateListAndTask(user, userEntity)
+        val mappedUserEntity = getUserEntity(user, rememberMe)
+        if (localUserEntity != null && localUserEntity.id == mappedUserEntity.id) {
+            updateUser(mappedUserEntity)
+            incrementalUpdateLocation(user, localUserEntity)
+            incrementalUpdateListAndTask(user, localUserEntity)
         } else {
             clearLocalUser()
-            setupNewLocalUser(userEntity)
-            downloadListAndTaskFromCloud(userEntity.id)
-            downloadLocationFromCloud(userEntity.id)
+            setupNewLocalUser(mappedUserEntity)
+            downloadListAndTaskFromCloud(mappedUserEntity.id)
+            downloadLocationFromCloud(mappedUserEntity.id)
         }
+        return getUserEntity(user, rememberMe)
     }
 
     private suspend fun incrementalUpdateListAndTask(user: SupabaseUser, userEntity: UserEntity) {
@@ -117,13 +127,15 @@ class UserRepository(
                 due = it.due,
                 time = it.time,
                 list = it.list,
+                locationNotification = it.locationNotification,
+                dateTimeNotification = it.dateTimeNotification
             )
         }
         room.taskDao().saveAll(taskEntities)
     }
 
     private suspend fun downloadLocationFromCloud(userId: Int) {
-        val locations = locationApi.getLocation(eq(userId))
+        val locations = locationApi.getLocations(eq(userId))
         val locationEntities = locations.map {
             if (it.id == null) throw BackendAppException("list id should never be null")
             LocationEntity(
@@ -134,6 +146,7 @@ class UserRepository(
                 radius = it.radius
             )
         }
+        room.locationDao().clear()
         room.locationDao().saveAll(locationEntities)
     }
 
@@ -164,6 +177,8 @@ class UserRepository(
                     due = task.due,
                     time = task.time,
                     list = task.list,
+                    locationNotification = task.locationNotification,
+                    dateTimeNotification = task.dateTimeNotification
                 )
             }
             room.taskDao().saveAll(taskEntities)
@@ -180,6 +195,12 @@ class UserRepository(
         val partialUpdate = mapOf("listVersion" to listVersion)
         userApi.updateLong(eq(userId), partialUpdate)
         room.userDao().updateListVersion(userId, listVersion)
+    }
+
+    private suspend fun updateLocationVersion(userId: Int, locationVersion: Long) {
+        val partialUpdate = mapOf("locationVersion" to locationVersion)
+        userApi.updateLong(eq(userId), partialUpdate)
+        room.userDao().updateLocationVersion(userId, locationVersion)
     }
 
     private fun getUserEntity(user: SupabaseUser, rememberMe: Boolean = true): UserEntity {
@@ -314,13 +335,6 @@ class UserRepository(
 
     private suspend fun setupNewLocalUser(userEntity: UserEntity) {
         room.userDao().save(userEntity)
-    }
-
-    suspend fun authenticateUserHash(userName: String, passwordHash: String): SupabaseUser? {
-        val response = userApi.getUser(eq(userName), eq(passwordHash))
-        Log.d(logTag, "response: $response")
-
-        return response.firstOrNull()
     }
 
     private fun eq(value: Int): String = "eq.$value"

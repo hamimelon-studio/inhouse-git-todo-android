@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -56,25 +58,28 @@ fun LocationList(navController: NavController, modifier: Modifier, onSelected: (
     }
 
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
     ) {
         uiState.locations.forEach { location ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(start = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .clickable {
                         onSelected(location)
                     }
             ) {
                 Icon(
+                    modifier = Modifier.size(20.dp),
                     imageVector = ImageVector.vectorResource(id = R.drawable.baseline_location_pin_24),
-                    contentDescription = "Cancel",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    contentDescription = "Location icon"
                 )
                 Text(
                     text = "${location.name} (radius: ${location.radius})",
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -104,8 +109,7 @@ fun LocationList(navController: NavController, modifier: Modifier, onSelected: (
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.baseline_add_24),
-                contentDescription = "Create New Location",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                contentDescription = "Create New Location"
             )
             Text(
                 text = "Create new",

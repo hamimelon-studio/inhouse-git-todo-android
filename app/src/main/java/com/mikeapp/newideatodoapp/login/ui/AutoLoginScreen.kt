@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.DefaultStrokeLineMiter
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -21,8 +22,8 @@ fun AutoLoginScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircularProgressIndicator(
-                strokeWidth = 8.dp,
-                modifier = Modifier.size(64.dp)
+                strokeWidth = DefaultStrokeLineMiter.dp,
+                modifier = Modifier.size(36.dp)
             )
             Spacer(modifier = Modifier.padding(16.dp))
             Text(text = "Auto logging...")
