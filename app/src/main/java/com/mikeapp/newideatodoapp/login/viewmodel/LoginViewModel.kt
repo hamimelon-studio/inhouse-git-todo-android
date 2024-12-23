@@ -3,6 +3,7 @@ package com.mikeapp.newideatodoapp.login.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mikeapp.newideatodoapp.Constant.logTag
 import com.mikeapp.newideatodoapp.data.UserRepository
 import com.mikeapp.newideatodoapp.data.exception.AppException
@@ -26,6 +27,7 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
             try {
                 repository.authenticateUser(userName, password, isRememberMe)
                 _uiState.value = _uiState.value.copy(isLoading = false)
+                setupOnLogin()
                 action.invoke()
             } catch (e: AppException) {
                 _uiState.value = _uiState.value.copy(
@@ -35,6 +37,10 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
                 Log.w(logTag, e.logMessage)
             }
         }
+    }
+
+    private suspend fun setupOnLogin() {
+        repository.setupGeoFence()
     }
 
     fun dismissUserNameError() {
@@ -102,6 +108,7 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
                     // log in success
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     Log.d("bbbb", "user: $user")
+                    setupOnLogin()
                     action.invoke()
                 } catch (e: AppException) {
                     Log.w(logTag, "auto log in failed, get null user name from repository call. exception: $e")

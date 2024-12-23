@@ -1,5 +1,6 @@
 package com.mikeapp.newideatodoapp.main.add.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikeapp.newideatodoapp.data.LocationRepository
@@ -50,13 +51,14 @@ class AddTaskViewModel(
         onDelete: (TaskEntity, LocationUi) -> Unit,
         onCompleted: () -> Unit
     ) {
+        Log.d("bbbb", "Before: ${locationUiBefore?.name}, $isLocationNotificationOnBefore ==> popLocation: ${locationUi?.name}, $isLocationNotificationOn")
         when {
             locationUi != null && isLocationNotificationOn
                     && (locationUiBefore == null || !isLocationNotificationOnBefore) ->
                 onAdd.invoke(task, locationUi)
 
             (locationUi == null || !isLocationNotificationOn)
-                    && locationUiBefore != null && !isLocationNotificationOnBefore ->
+                    && locationUiBefore != null && isLocationNotificationOnBefore ->
                 onDelete.invoke(
                     task, locationUiBefore!!
                 )

@@ -14,11 +14,14 @@ import com.mikeapp.newideatodoapp.data.room.model.UserEntity
 import com.mikeapp.newideatodoapp.data.supabase.SupabaseNetworkModule
 import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseList
 import com.mikeapp.newideatodoapp.data.supabase.model.SupabaseUser
+import com.mikeapp.newideatodoapp.geo.GeoDomainManager
+import com.mikeapp.newideatodoapp.main.add.model.LocationUi
 import com.mikeapp.newideatodoapp.util.SecurityUtil
 import org.koin.java.KoinJavaComponent.get
 
 class UserRepository(
     private val room: TnnDatabase,
+    private val geoDomainManager: GeoDomainManager,
     networkModule: SupabaseNetworkModule
 ) {
     private val securityUtil = get<SecurityUtil>(SecurityUtil::class.java)
@@ -40,7 +43,7 @@ class UserRepository(
         if (user.id == null) throw CodeLogicException("user id is null")
 
         val userEntity = getUserEntity(user)
-        val localUserEntity = getLocalUserIdNullable()
+        val localUserEntity = getLocalUserNullable()
         if (localUserEntity != null && localUserEntity.id == userEntity.id) {
             updateUser(userEntity)
         } else {
@@ -67,9 +70,35 @@ class UserRepository(
         return authenticateUserImpl(userName, passwordHash, true)
     }
 
+    suspend fun setupGeoFence() {
+        val userId = getLocalUserNullable()?.id ?: throw CodeLogicException("setupGeoFence - User or userId is null")
+        val defaultListId =
+            getDefaultList(userId).id ?: throw CodeLogicException("setupGeoFence - default list is null")
+        val tasks = room.taskDao().getTasks(defaultListId)
+        tasks.forEach { task ->
+            task.location?.let { locationId ->
+                if (task.locationNotification) {
+                    val location = room.locationDao().getLocation(locationId)
+                    location?.let {
+                        geoDomainManager.addGeoTask(
+                            task = task,
+                            locationUi = LocationUi(
+                                id = location.id,
+                                name = location.name,
+                                lat = location.lat,
+                                lon = location.lon,
+                                radius = location.radius
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private suspend fun authenticateUserImpl(userName: String, passwordHash: String, rememberMe: Boolean): UserEntity {
         val user = loadUserFromBackendByCredentials(userName, passwordHash)
-        val localUserEntity = getLocalUserIdNullable()
+        val localUserEntity = getLocalUserNullable()
         val mappedUserEntity = getUserEntity(user, rememberMe)
         if (localUserEntity != null && localUserEntity.id == mappedUserEntity.id) {
             updateUser(mappedUserEntity)
@@ -318,7 +347,7 @@ class UserRepository(
         }
     }
 
-    private suspend fun getLocalUserIdNullable(): UserEntity? {
+    private suspend fun getLocalUserNullable(): UserEntity? {
         return room.userDao().getUser().firstOrNull()
     }
 

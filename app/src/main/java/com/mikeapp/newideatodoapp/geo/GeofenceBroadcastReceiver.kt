@@ -7,8 +7,6 @@ import android.util.Log
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.mikeapp.newideatodoapp.alarm.NotificationLauncher
-import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.geofenceIdHome
-import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.geofenceIdWork
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -42,13 +40,15 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             saveLongMessage(context, "GeofenceBroadcastReceiver: geofenceIds: $geofenceIds")
             return
         }
-        val location = if (geofenceIdHome in geofenceIds) {
-            "Home location"
-        } else if (geofenceIdWork in geofenceIds) {
-            "Work location"
-        } else {
-            "Unknown location"
-        }
+        val description = geofenceIds.joinToString(", ")
+
+//        val location = if (geofenceIdHome in geofenceIds) {
+//            "Home location"
+//        } else if (geofenceIdWork in geofenceIds) {
+//            "Work location"
+//        } else {
+//            "Unknown location"
+//        }
 
         val event = if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             // Handle entering the geofence
@@ -68,8 +68,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             "unknown event $geofencingEvent"
         }
 
-        val title = "Geofence Transition!"
-        val message = "$event location: $location detected!"
+        val title = "Geofence Transition Detected!"
+        val message = "$event location: $description!"
         NotificationLauncher.notify(context, title, message)
     }
 

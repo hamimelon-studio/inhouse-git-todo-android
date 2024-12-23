@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.mikeapp.newideatodoapp.alarm.AlarmStarter
 import com.mikeapp.newideatodoapp.data.TaskRepository
+import com.mikeapp.newideatodoapp.geo.GeoDomainManager
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase.Companion.LOCATION_PERMISSION_REQUEST_CODE
 import com.mikeapp.newideatodoapp.map.MapActivity
@@ -29,6 +30,8 @@ class MainActivity : ComponentActivity() {
     private val alarmStarter = AlarmStarter()
 
     private val geofenceUseCase: GeofenceUseCase = get(GeofenceUseCase::class.java)
+
+    private val geoDomainManager: GeoDomainManager = get(GeoDomainManager::class.java)
 
     private val taskRepository: TaskRepository by inject(TaskRepository::class.java)
 

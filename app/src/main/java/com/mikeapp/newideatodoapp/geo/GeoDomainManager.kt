@@ -28,6 +28,8 @@ class GeoDomainManager(private val context: Context) {
     }
 
     fun addGeoTask(task: TaskEntity, locationUi: LocationUi) {
+        Log.d("bbbb", "addGeoTask: $task, locationUi: $locationUi")
+        printDebugList()
         val locationId = locationUi.id ?: throw CodeLogicException("locationUi.id == null")
         if (taskById.containsKey(task.id)) {
             return
@@ -36,7 +38,7 @@ class GeoDomainManager(private val context: Context) {
         val geoTask = GeoTask(
             locationId = locationId,
             locationUi = locationUi,
-            geoId = locationUi.toString(),
+            geoId = locationUi.buildGeoName(task),
             taskId = task.id,
             listId = task.list,
             date = task.due?.let { LocalDate.parse(it) },
@@ -46,15 +48,17 @@ class GeoDomainManager(private val context: Context) {
         )
         taskById[task.id] = geoTask
         if (!geoTasks.containsKey(locationUi)) {
-//            addGeoFence(locationUi)
-            GeofenceUseCase(context).register()
-            geoTasks[locationUi]?.add(geoTask)
-        } else {
+            addGeoFence(task, locationUi)
+//            GeofenceUseCase(context).register()
             geoTasks[locationUi] = mutableListOf(geoTask)
+        } else {
+            geoTasks[locationUi]?.add(geoTask)
         }
     }
 
     fun removeGeoTask(task: TaskEntity, locationUi: LocationUi) {
+        Log.d("bbbb", "removeGeoTask: $task, locationUi: $locationUi")
+        printDebugList()
         if (taskById.containsKey(task.id)) {
             taskById.remove(task.id)
         }
@@ -63,7 +67,7 @@ class GeoDomainManager(private val context: Context) {
             taskList?.removeIf { it.taskId == task.id }
             if (taskList?.isEmpty() == true) {
                 geoTasks.remove(locationUi)
-                deleteGeoFence(locationUi.toString())
+                deleteGeoFence(locationUi.buildGeoName(task))
             }
         }
     }
@@ -74,6 +78,7 @@ class GeoDomainManager(private val context: Context) {
         geofencingClient.removeGeofences(geofenceIdsToRemove).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Log.d(logTag, "Geofence for location: $geoFenceId delete succeed.")
+                printDebugList()
             } else {
                 Log.w(logTag, "Geofence for location: $geoFenceId delete failure. reason: $task")
             }
@@ -81,13 +86,15 @@ class GeoDomainManager(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    private fun addGeoFence(locationUi: LocationUi) {
+    private fun addGeoFence(task: TaskEntity, locationUi: LocationUi) {
         Log.d("bbbb", "addGeoFence: $locationUi")
-        val geoFence = buildGeofence(locationUi.toString(), locationUi.lat, locationUi.lat, locationUi.radius.toFloat())
+        val geoFence =
+            buildGeofence(locationUi.buildGeoName(task), locationUi.lat, locationUi.lat, locationUi.radius.toFloat())
         val geoFenceRequest = createRequest(geoFence)
         geofencingClient.addGeofences(geoFenceRequest, pendingIntent)
             .addOnSuccessListener {
                 Log.d(logTag, "Geofence for location: $locationUi added succeed.")
+                printDebugList()
             }
             .addOnFailureListener {
                 Log.w(logTag, "Geofence for location: $locationUi added failure. ${it.localizedMessage}")
@@ -96,7 +103,11 @@ class GeoDomainManager(private val context: Context) {
 
     private fun createRequest(geoFence: Geofence): GeofencingRequest {
         val geofencingRequest = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            .setInitialTrigger(
+                GeofencingRequest.INITIAL_TRIGGER_ENTER or
+                        GeofencingRequest.INITIAL_TRIGGER_EXIT or
+                        GeofencingRequest.INITIAL_TRIGGER_DWELL
+            )
             .addGeofence(geoFence)
             .build()
         return geofencingRequest
@@ -104,7 +115,7 @@ class GeoDomainManager(private val context: Context) {
 
     private fun buildGeofence(name: String, lat: Double, lon: Double, radius: Float): Geofence {
         val geofence = Geofence.Builder()
-            .setRequestId("Home location")
+            .setRequestId(name)
             .setCircularRegion(lat, lon, radius)
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
             .setTransitionTypes(
@@ -117,7 +128,25 @@ class GeoDomainManager(private val context: Context) {
         return geofence
     }
 
+    private fun LocationUi.buildGeoName(task: TaskEntity): String {
+        return "Task: ${task.name} @${this.name}"
+    }
+
+    private fun printDebugList() {
+        val sb = StringBuilder("hashMap(taskById): ")
+        taskById.forEach { (taskId, task) ->
+            sb.append("[$taskId]")
+        }
+        Log.d("bbbb", sb.toString())
+
+        val sb2 = StringBuilder("hashMap(geoTasks): ")
+        geoTasks.forEach { (location, list) ->
+            sb2.append("[${location.name}]: [${list.joinToString { it.geoId }}], ")
+        }
+        Log.d("bbbb", sb2.toString())
+    }
+
     companion object {
-        private const val GEO_REQUEST_CODE = 0
+        private const val GEO_REQUEST_CODE = 1
     }
 }
