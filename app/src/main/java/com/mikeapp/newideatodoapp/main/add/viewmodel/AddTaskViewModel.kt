@@ -6,6 +6,7 @@ import com.mikeapp.newideatodoapp.data.LocationRepository
 import com.mikeapp.newideatodoapp.data.TaskRepository
 import com.mikeapp.newideatodoapp.data.enums.TaskPriority
 import com.mikeapp.newideatodoapp.data.room.model.TaskEntity
+import com.mikeapp.newideatodoapp.geo.GeoDomainManager
 import com.mikeapp.newideatodoapp.main.add.model.LocationUi
 import com.mikeapp.newideatodoapp.main.add.model.LocationUiState
 import kotlinx.coroutines.Dispatchers
@@ -19,17 +20,57 @@ import java.time.LocalTime
 
 class AddTaskViewModel(
     private val repository: TaskRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val geoDomainManager: GeoDomainManager
 ) : ViewModel() {
     private var _locationUiState = MutableStateFlow(LocationUiState(emptyList()))
 
     val locationUiState: StateFlow<LocationUiState> = _locationUiState.asStateFlow()
+
+    private var locationUiBefore: LocationUi? = null
+    private var isLocationNotificationOnBefore: Boolean = false
 
     suspend fun getTask(taskId: Int): TaskEntity {
         return withContext(Dispatchers.IO) {
             val task = repository.getTask(taskId)
             return@withContext task
         }
+    }
+
+    fun pushLocation(locationUi: LocationUi?, isLocationNotificationOn: Boolean) {
+        locationUiBefore = locationUi
+        isLocationNotificationOnBefore = isLocationNotificationOn
+    }
+
+    fun popLocation(
+        task: TaskEntity,
+        locationUi: LocationUi?,
+        isLocationNotificationOn: Boolean,
+        onAdd: (TaskEntity, LocationUi) -> Unit,
+        onDelete: (TaskEntity, LocationUi) -> Unit,
+        onCompleted: () -> Unit
+    ) {
+        when {
+            locationUi != null && isLocationNotificationOn
+                    && (locationUiBefore == null || !isLocationNotificationOnBefore) ->
+                onAdd.invoke(task, locationUi)
+
+            (locationUi == null || !isLocationNotificationOn)
+                    && locationUiBefore != null && !isLocationNotificationOnBefore ->
+                onDelete.invoke(
+                    task, locationUiBefore!!
+                )
+
+            isLocationNotificationOnBefore && isLocationNotificationOn
+                    && locationUiBefore != null && locationUi != null
+                    && locationUiBefore != locationUi -> {
+                onAdd.invoke(task, locationUi)
+                onDelete.invoke(task, locationUiBefore!!)
+            }
+        }
+        locationUiBefore = null
+        isLocationNotificationOnBefore = false
+        onCompleted.invoke()
     }
 
     fun saveTask(
@@ -62,7 +103,20 @@ class AddTaskViewModel(
             } else {
                 repository.addTask(taskEntity)
             }
-            onCompleted.invoke()
+
+            popLocation(
+                task = taskEntity,
+                locationUi = location,
+                isLocationNotificationOn = locationNotification,
+                onAdd = { task, location ->
+                    geoDomainManager.addGeoTask(task, location)
+                },
+                onDelete = { task, location ->
+                    geoDomainManager.removeGeoTask(task, location)
+                }
+            ) {
+                onCompleted.invoke()
+            }
         }
     }
 

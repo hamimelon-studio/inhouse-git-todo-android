@@ -131,6 +131,17 @@ fun AddTaskScreen(navController: NavController, paddingValues: PaddingValues, ta
             }
             isLocationNotificationOn = taskEntity.locationNotification
             isDateTimeNotificationOn = taskEntity.dateTimeNotification
+
+            try {
+                location = viewModel.getLocationById(locationId)
+                viewModel.pushLocation(location, isLocationNotificationOn)
+            } catch (e: AppException) {
+                locationId = -1
+                location = null
+                viewModel.pushLocation(null, isLocationNotificationOn)
+            }
+        } else {
+            viewModel.pushLocation(null, false)
         }
     }
 

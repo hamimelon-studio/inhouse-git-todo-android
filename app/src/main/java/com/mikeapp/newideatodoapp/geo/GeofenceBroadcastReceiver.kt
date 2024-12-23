@@ -31,6 +31,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         }
 
         val geofenceIds = geofencingEvent.triggeringGeofences?.map { it.requestId }
+        Log.d("bbbb", "geofenceIds: $geofenceIds --")
         if (geofenceIds == null) {
             Log.d("bbbb", "geofenceIds: $geofenceIds")
             NotificationLauncher.notify(

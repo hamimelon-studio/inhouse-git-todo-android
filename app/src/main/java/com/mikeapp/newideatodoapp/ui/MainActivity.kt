@@ -36,8 +36,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 //        adaptEdgeToEdge(window.decorView)
-        geofenceUseCase.requestPermissions(this@MainActivity)
-        geofenceUseCase.register()
+//        geofenceUseCase.requestPermissions(this@MainActivity)
+//        geofenceUseCase.register()
         setContent {
             SetSystemBarsColor()
             AppNav()

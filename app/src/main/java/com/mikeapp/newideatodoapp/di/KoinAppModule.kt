@@ -9,6 +9,7 @@ import com.mikeapp.newideatodoapp.data.UserRepository
 import com.mikeapp.newideatodoapp.data.github.GithubNetworkModule
 import com.mikeapp.newideatodoapp.data.room.TnnDatabase
 import com.mikeapp.newideatodoapp.data.supabase.SupabaseNetworkModule
+import com.mikeapp.newideatodoapp.geo.GeoDomainManager
 import com.mikeapp.newideatodoapp.geo.GeofenceUseCase
 import com.mikeapp.newideatodoapp.login.viewmodel.LoginViewModel
 import com.mikeapp.newideatodoapp.login.viewmodel.RegisterViewModel
@@ -31,6 +32,7 @@ val appModule = module {
         ).build()
     }
 
+    single { GeoDomainManager(get()) }
     single { SecurityUtil() }
     single { GithubOpenApiRepository(get()) }
     single { UserRepository(get(), get()) }
@@ -41,5 +43,5 @@ val appModule = module {
     viewModel { LoginViewModel(get()) }
     viewModel { RegisterViewModel(get()) }
     viewModel { TodoViewModel(get()) }
-    viewModel { AddTaskViewModel(get(), get()) }
+    viewModel { AddTaskViewModel(get(), get(), get()) }
 }
